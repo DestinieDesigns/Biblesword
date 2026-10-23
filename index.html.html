@@ -1,0 +1,1702 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>Sword in Hand</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Alegreya+Sans:wght@500;700;800&display=swap" rel="stylesheet" />
+    <style>
+      :root{
+        color-scheme: light dark;
+        --bg:#0e1830;
+        --bg2:#132242;
+        --panel:#16294f;
+        --panel-line:#2c4470;
+        --parchment:#f7ecd2;
+        --parchment2:#efe0ba;
+        --ink:#2a1c10;
+        --ink-soft:#5a4526;
+        --gold:#d9a441;
+        --gold-bright:#f0bc4e;
+        --gold-deep:#a5761f;
+        --leather:#7a4a21;
+        --leather-dark:#54300f;
+        --cream:#f3e9cf;
+        --cream-dim:#cbbd97;
+        --good:#3f7d3a;
+        --good-bg:#dcefd4;
+        --bad:#a33327;
+        --bad-bg:#f6d9d2;
+        --red:#e0483a;
+        --shadow:0 10px 30px rgba(0,0,0,.45);
+        --radius:14px;
+      }
+      @media (prefers-color-scheme: light){
+        :root{
+          --bg:#1a2c52;
+          --bg2:#213763;
+          --panel:#24406e;
+          --panel-line:#3a5b94;
+        }
+      }
+      *{ box-sizing:border-box; }
+      html,body{ margin:0; padding:0; }
+      body{
+        font-family:"Alegreya Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+        background:
+          radial-gradient(1200px 600px at 50% -10%, var(--bg2), transparent 70%),
+          repeating-linear-gradient(45deg, rgba(255,255,255,.012) 0 14px, transparent 14px 28px),
+          var(--bg);
+        color:var(--cream);
+        min-height:100vh;
+        -webkit-tap-highlight-color:transparent;
+      }
+      main{ max-width:640px; margin:0 auto; padding:18px 16px 40px; }
+      .screen{ display:none; }
+      .screen.active{ display:block; animation:screenIn .25s ease-out; }
+      @keyframes screenIn{ from{ opacity:0; transform:translateY(6px);} to{ opacity:1; transform:none;} }
+
+      h1,h2,h3,.display{ font-family:"Cinzel", Georgia, serif; }
+      .title-wrap{ text-align:center; padding:14px 0 4px; }
+      .sword-mark{ width:64px; height:64px; margin:0 auto 2px; display:block; }
+      .game-title{ font-size:2.35rem; font-weight:900; letter-spacing:.04em; margin:2px 0 2px; color:var(--gold-bright); text-shadow:0 2px 0 rgba(0,0,0,.35); }
+      .tagline{ margin:0; color:var(--cream-dim); font-size:1.02rem; font-weight:500; }
+      .tagline em{ color:var(--cream); }
+
+      .parchment{
+        background:linear-gradient(180deg, var(--parchment), var(--parchment2));
+        color:var(--ink);
+        border:2px solid var(--leather);
+        border-radius:var(--radius);
+        box-shadow:var(--shadow), inset 0 0 0 4px rgba(122,74,33,.12);
+        padding:18px;
+      }
+      .panel{
+        background:var(--panel);
+        border:1.5px solid var(--panel-line);
+        border-radius:var(--radius);
+        padding:16px;
+        box-shadow:var(--shadow);
+      }
+      .section-label{ font-family:"Cinzel",serif; font-weight:700; letter-spacing:.08em; font-size:.86rem; color:var(--gold-bright); margin:0 0 10px; text-transform:uppercase; }
+
+      /* selectable option cards / chips */
+      .opt-grid{ display:grid; gap:10px; }
+      .opt-grid.two{ grid-template-columns:1fr 1fr; }
+      @media (max-width:430px){ .opt-grid.two{ grid-template-columns:1fr; } }
+      .mode-card{
+        text-align:left; width:100%; cursor:pointer;
+        background:rgba(255,255,255,.05); color:var(--cream);
+        border:2px solid var(--panel-line); border-radius:var(--radius);
+        padding:14px 14px 12px; font:inherit;
+      }
+      .mode-card .mc-title{ font-family:"Cinzel",serif; font-weight:700; font-size:1.08rem; display:flex; align-items:center; gap:8px; }
+      .mode-card .mc-tag{ font-size:.72rem; font-weight:800; letter-spacing:.06em; padding:2px 8px; border-radius:999px; background:var(--leather); color:#ffe9bd; text-transform:uppercase; }
+      .mode-card .mc-tag.verified{ background:var(--gold-deep); color:#fff7e0; }
+      .mode-card p{ margin:6px 0 0; font-size:.93rem; line-height:1.35; color:var(--cream-dim); }
+      .mode-card.selected{ border-color:var(--gold); background:rgba(217,164,65,.14); box-shadow:0 0 0 2px rgba(217,164,65,.35); }
+      .mode-card.selected .mc-title{ color:var(--gold-bright); }
+
+      .chip-row{ display:flex; flex-wrap:wrap; gap:8px; }
+      .chip{
+        cursor:pointer; font:inherit; font-weight:700; font-size:1rem;
+        padding:11px 16px; border-radius:999px; min-height:48px;
+        background:rgba(255,255,255,.06); color:var(--cream);
+        border:2px solid var(--panel-line);
+      }
+      .chip.selected{ background:var(--gold); border-color:var(--gold-deep); color:#241703; }
+      .chip small{ display:block; font-size:.72rem; font-weight:700; opacity:.75; letter-spacing:.02em; }
+
+      .toggle-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
+      .toggle{ position:relative; width:64px; height:36px; flex:0 0 auto; cursor:pointer; border-radius:999px; border:2px solid var(--panel-line); background:rgba(255,255,255,.08); padding:0; }
+      .toggle::after{ content:""; position:absolute; top:3px; left:3px; width:26px; height:26px; border-radius:50%; background:var(--cream-dim); transition:left .18s ease, background .18s ease; }
+      .toggle[aria-checked="true"]{ background:var(--gold-deep); border-color:var(--gold); }
+      .toggle[aria-checked="true"]::after{ left:31px; background:#fff3d0; }
+
+      .btn{
+        display:block; width:100%; cursor:pointer; font:inherit; font-weight:800;
+        font-size:1.12rem; padding:16px 18px; min-height:58px; border-radius:var(--radius);
+        border:2px solid transparent; text-align:center; text-decoration:none;
+      }
+      .btn-gold{ background:linear-gradient(180deg, var(--gold-bright), var(--gold)); color:#241703; border-color:var(--gold-deep); box-shadow:0 4px 0 var(--gold-deep), var(--shadow); }
+      .btn-gold:active{ transform:translateY(2px); box-shadow:0 2px 0 var(--gold-deep); }
+      .btn-brown{ background:linear-gradient(180deg, #8a5a2b, var(--leather)); color:#ffeeda; border-color:var(--leather-dark); box-shadow:0 4px 0 var(--leather-dark); }
+      .btn-brown:active{ transform:translateY(2px); box-shadow:0 2px 0 var(--leather-dark); }
+      .btn-ghost{ background:transparent; color:var(--cream); border-color:var(--panel-line); font-size:1rem; min-height:50px; padding:12px 16px; }
+      .btn[disabled]{ opacity:.45; cursor:default; }
+      .btn-row{ display:grid; gap:10px; }
+      .btn-row.two{ grid-template-columns:1fr 1fr; }
+
+      .best-strip{ display:flex; gap:10px; margin-top:12px; }
+      .best-box{ flex:1; text-align:center; background:rgba(0,0,0,.22); border:1.5px dashed var(--panel-line); border-radius:10px; padding:10px 6px; }
+      .best-box .bb-num{ font-family:"Cinzel",serif; font-weight:900; font-size:1.4rem; color:var(--gold-bright); }
+      .best-box .bb-lab{ font-size:.74rem; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--cream-dim); }
+
+      details.howto{ margin-top:14px; }
+      details.howto summary{ cursor:pointer; font-family:"Cinzel",serif; font-weight:700; color:var(--gold-bright); letter-spacing:.05em; padding:6px 0; font-size:1rem; }
+      details.howto p, details.howto li{ color:var(--cream-dim); line-height:1.45; font-size:.97rem; }
+      details.howto ul{ margin:6px 0; padding-left:20px; }
+      details.howto strong{ color:var(--cream); }
+
+      /* top status bar during play */
+      .statusbar{ display:flex; align-items:center; gap:8px; margin-bottom:12px; }
+      .statusbar .sb-pill{ background:rgba(0,0,0,.28); border:1.5px solid var(--panel-line); border-radius:999px; padding:6px 12px; font-weight:800; font-size:.92rem; white-space:nowrap; }
+      .statusbar .sb-pill.score{ color:var(--gold-bright); }
+      .statusbar .spacer{ flex:1; }
+      .icon-btn{ cursor:pointer; font:inherit; font-weight:800; background:rgba(0,0,0,.28); color:var(--cream); border:1.5px solid var(--panel-line); border-radius:999px; padding:8px 14px; min-height:40px; }
+
+      /* countdown timer */
+      .timer-wrap{ margin:4px 0 14px; }
+      .timer-num{ font-family:"Cinzel",serif; font-weight:900; font-size:3rem; text-align:center; line-height:1; color:var(--cream); }
+      .timer-num.low{ color:var(--red); }
+      .timer-num .t-lab{ display:block; font-family:"Alegreya Sans",sans-serif; font-size:.8rem; font-weight:800; letter-spacing:.14em; color:var(--cream-dim); margin-top:4px; }
+      .timer-bar{ height:14px; border-radius:999px; background:rgba(0,0,0,.4); border:1.5px solid var(--panel-line); overflow:hidden; margin-top:10px; }
+      .timer-fill{ height:100%; width:100%; background:linear-gradient(90deg, var(--gold-deep), var(--gold-bright)); transition:width .12s linear; }
+      .timer-fill.low{ background:linear-gradient(90deg, #8f2318, var(--red)); }
+
+      /* the call */
+      .call-card{ text-align:center; padding:22px 16px 18px; }
+      .call-shout{ font-family:"Cinzel",serif; font-weight:900; font-size:clamp(1.7rem, 7.5vw, 2.5rem); letter-spacing:.03em; color:var(--leather-dark); margin:0; }
+      .call-find{ margin:8px 0 0; font-size:1.05rem; font-weight:700; color:var(--ink-soft); letter-spacing:.06em; text-transform:uppercase; }
+      .call-ref{ font-family:"Cinzel",serif; font-weight:900; font-size:clamp(2rem, 9vw, 3rem); color:var(--ink); margin:2px 0 4px; line-height:1.08; }
+      .call-diff{ display:inline-block; margin-top:6px; font-size:.78rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; background:var(--leather); color:#ffe9bd; padding:3px 10px; border-radius:999px; }
+
+      .found-btn{
+        font-size:1.7rem; min-height:96px; letter-spacing:.02em;
+        background:linear-gradient(180deg, #c93a2c, #a33327); color:#fff4e8;
+        border-color:#6e1d14; box-shadow:0 6px 0 #6e1d14, var(--shadow);
+        font-family:"Cinzel",serif; font-weight:900;
+      }
+      .found-btn:active{ transform:translateY(3px); box-shadow:0 3px 0 #6e1d14; }
+
+      .hint-line{ text-align:center; margin-top:12px; }
+      .hint-text{ display:none; margin-top:10px; background:rgba(217,164,65,.15); border:1.5px dashed var(--gold-deep); color:#ffe9bd; border-radius:10px; padding:10px 12px; font-weight:700; }
+      .hint-text.show{ display:block; }
+
+      /* in-app grids */
+      .step-track{ display:flex; gap:6px; margin:0 0 12px; }
+      .step-track .st{ flex:1; text-align:center; font-weight:800; font-size:.86rem; padding:9px 4px; border-radius:10px; background:rgba(0,0,0,.25); border:1.5px solid var(--panel-line); color:var(--cream-dim); }
+      .step-track .st.now{ background:var(--gold); color:#241703; border-color:var(--gold-deep); }
+      .step-track .st.done{ background:rgba(63,125,58,.35); color:#cdebc4; border-color:var(--good); }
+      .grid-head{ font-family:"Cinzel",serif; font-weight:700; color:var(--gold-bright); margin:14px 0 8px; font-size:1rem; letter-spacing:.04em; }
+      .grid-head:first-child{ margin-top:0; }
+      .tap-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(96px, 1fr)); gap:8px; }
+      .tap-grid.nums{ grid-template-columns:repeat(auto-fill, minmax(52px, 1fr)); }
+      .tap-cell{
+        cursor:pointer; font:inherit; font-weight:700; font-size:.95rem; line-height:1.15;
+        padding:11px 6px; min-height:48px; border-radius:10px;
+        background:var(--parchment); color:var(--ink); border:2px solid var(--leather);
+        box-shadow:0 2px 0 var(--leather-dark);
+      }
+      .tap-grid.nums .tap-cell{ font-size:1.05rem; padding:9px 2px; }
+      .tap-cell:active{ transform:translateY(1px); box-shadow:none; }
+      .tap-cell.wrong{ background:var(--bad-bg); border-color:var(--bad); color:var(--bad); animation:shake .3s; }
+      .tap-cell.right{ background:var(--good-bg); border-color:var(--good); color:#234d1e; }
+      @keyframes shake{ 0%,100%{transform:translateX(0);} 25%{transform:translateX(-5px);} 75%{transform:translateX(5px);} }
+      .tap-feedback{ min-height:26px; text-align:center; font-weight:800; margin:10px 0 2px; color:var(--gold-bright); }
+      .crumb{ text-align:center; font-weight:800; font-size:1.05rem; color:var(--cream); margin:2px 0 6px; }
+      .crumb .dim{ color:var(--cream-dim); font-weight:600; }
+
+      /* proof + reveal */
+      .proof-q{ font-size:1.12rem; font-weight:700; line-height:1.45; color:var(--ink); margin:0 0 6px; }
+      .proof-ref{ font-family:"Cinzel",serif; font-weight:900; font-size:1.5rem; color:var(--leather-dark); text-align:center; margin:0 0 10px; }
+      .choice{
+        display:block; width:100%; text-align:left; cursor:pointer; font:inherit;
+        background:#fffdf4; color:var(--ink); border:2px solid var(--leather);
+        border-radius:12px; padding:14px; margin-top:10px; font-size:1.02rem; line-height:1.45;
+        font-family:Georgia, "Times New Roman", serif;
+      }
+      .choice.word{ text-align:center; font-family:"Alegreya Sans",sans-serif; font-weight:800; font-size:1.15rem; }
+      .choice:active{ transform:translateY(1px); }
+      .choice.picked-right{ background:var(--good-bg); border-color:var(--good); }
+      .choice.picked-wrong{ background:var(--bad-bg); border-color:var(--bad); }
+      .blank-verse{ font-family:Georgia,"Times New Roman",serif; font-size:1.14rem; line-height:1.6; background:#fffdf4; border:2px dashed var(--leather); border-radius:12px; padding:14px; }
+      .blank-slot{ display:inline-block; min-width:74px; text-align:center; border-bottom:3px solid var(--gold-deep); color:var(--gold-deep); font-weight:700; padding:0 4px; }
+      .proof-timer{ text-align:center; font-family:"Cinzel",serif; font-weight:900; font-size:1.6rem; color:var(--leather-dark); }
+      .proof-timer.low{ color:var(--bad); }
+
+      .verdict{ text-align:center; font-family:"Cinzel",serif; font-weight:900; font-size:1.7rem; margin:0 0 4px; }
+      .verdict.good{ color:var(--good); }
+      .verdict.bad{ color:var(--bad); }
+      .verdict-sub{ text-align:center; margin:0 0 12px; color:var(--ink-soft); font-weight:700; }
+      .verse-text{ font-family:Georgia,"Times New Roman",serif; font-size:1.22rem; line-height:1.62; margin:10px 0 6px; }
+      .verse-ref-line{ text-align:right; font-family:"Cinzel",serif; font-weight:700; color:var(--leather-dark); font-size:1.05rem; margin:0; }
+      .score-lines{ margin:14px 0 4px; border-top:1.5px dashed rgba(122,74,33,.4); padding-top:10px; }
+      .score-lines .sl{ display:flex; justify-content:space-between; font-weight:700; color:var(--ink-soft); padding:3px 0; font-size:1rem; }
+      .score-lines .sl b{ color:var(--ink); }
+      .score-lines .sl.neg b{ color:var(--bad); }
+      .score-lines .sl.total{ border-top:1.5px solid rgba(122,74,33,.4); margin-top:6px; padding-top:8px; font-size:1.12rem; }
+      .score-lines .sl.total b{ color:var(--leather-dark); font-family:"Cinzel",serif; }
+
+      /* results */
+      .stat-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; }
+      .stat-box{ background:rgba(0,0,0,.25); border:1.5px solid var(--panel-line); border-radius:12px; text-align:center; padding:14px 8px; }
+      .stat-box .sv{ font-family:"Cinzel",serif; font-weight:900; font-size:1.75rem; color:var(--gold-bright); line-height:1; }
+      .stat-box .sl2{ font-size:.78rem; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:var(--cream-dim); margin-top:6px; }
+      .result-list{ list-style:none; margin:0 0 6px; padding:0; }
+      .result-list li{ display:flex; justify-content:space-between; align-items:baseline; gap:10px; padding:9px 2px; border-bottom:1px dashed rgba(122,74,33,.35); font-weight:700; }
+      .result-list li:last-child{ border-bottom:none; }
+      .result-list .rr{ font-family:"Cinzel",serif; font-weight:700; }
+      .result-list .rt{ color:var(--ink-soft); font-size:.92rem; white-space:nowrap; }
+      .result-list .rp{ color:var(--leather-dark); font-weight:800; white-space:nowrap; }
+      .empty-note{ color:var(--ink-soft); font-weight:600; padding:6px 2px 10px; }
+      .honest-note{ font-size:.95rem; line-height:1.45; color:var(--cream-dim); background:rgba(0,0,0,.22); border:1.5px solid var(--panel-line); border-radius:10px; padding:12px 14px; margin:14px 0; }
+      .new-best{ text-align:center; font-family:"Cinzel",serif; font-weight:900; color:var(--gold-bright); font-size:1.15rem; margin:0 0 12px; }
+
+      /* ready screen */
+      .ready-big{ font-family:"Cinzel",serif; font-weight:900; font-size:2rem; text-align:center; color:var(--gold-bright); margin:10px 0 4px; }
+      .ready-sub{ text-align:center; color:var(--cream-dim); font-size:1.05rem; line-height:1.5; margin:0 0 8px; }
+      .count-num{ font-family:"Cinzel",serif; font-weight:900; font-size:6.5rem; text-align:center; line-height:1.1; color:var(--cream); min-height:120px; }
+      .count-num.pop{ animation:pop .5s ease-out; }
+      @keyframes pop{ 0%{ transform:scale(1.5); opacity:.2;} 100%{ transform:scale(1); opacity:1;} }
+
+      /* pause overlay */
+      .overlay{ display:none; position:fixed; inset:0; background:rgba(5,9,20,.78); z-index:50; align-items:center; justify-content:center; padding:20px; }
+      .overlay.show{ display:flex; }
+      .overlay .panel{ width:100%; max-width:380px; }
+
+      /* proof methods */
+      .method-btn{ display:block; width:100%; text-align:left; cursor:pointer; font:inherit; background:#fffdf4; color:var(--ink); border:2px solid var(--leather); border-radius:12px; padding:14px; margin-top:10px; }
+      .method-btn .mb-title{ font-family:"Cinzel",serif; font-weight:900; font-size:1.15rem; color:var(--leather-dark); display:block; }
+      .method-btn p{ margin:4px 0 0; font-size:.95rem; line-height:1.4; color:var(--ink-soft); font-weight:600; }
+      .method-btn:active{ transform:translateY(1px); }
+      .heard-box{ background:#fffdf4; border:2px dashed var(--leather); border-radius:12px; padding:12px 14px; min-height:56px; font-size:1.05rem; line-height:1.45; color:var(--ink); }
+      .heard-box .dim2{ color:var(--ink-soft); font-weight:600; }
+      .listen-status{ text-align:center; font-weight:800; font-size:1.05rem; color:var(--leather-dark); margin:10px 0 6px; }
+      .listen-status.live{ color:var(--bad); }
+      .photo-img{ width:100%; border-radius:12px; border:2px solid var(--leather); display:block; }
+      .key-points{ margin:6px 0 0; padding-left:20px; }
+      .key-points li{ font-weight:700; color:var(--ink); line-height:1.45; }
+      .compare-box{ background:#fffdf4; border:2px dashed var(--leather); border-radius:12px; padding:12px 14px; margin-top:12px; }
+      .compare-box .cb-head{ font-family:"Cinzel",serif; font-weight:700; color:var(--leather-dark); font-size:.95rem; margin:0 0 6px; }
+      .switch-link{ display:inline-block; background:none; border:none; cursor:pointer; font:inherit; font-weight:800; color:var(--leather-dark); text-decoration:underline; padding:10px 6px; }
+      .fallback-note{ background:var(--bad-bg); border:2px solid var(--bad); color:var(--ink); border-radius:12px; padding:12px 14px; font-weight:700; line-height:1.45; margin-top:10px; }
+
+      .small-note{ font-size:.88rem; color:var(--cream-dim); text-align:center; margin-top:10px; line-height:1.4; }
+      .mt{ margin-top:14px; } .mt-lg{ margin-top:22px; }
+      @media (prefers-reduced-motion: reduce){
+        .screen.active, .count-num.pop, .tap-cell.wrong{ animation:none; }
+        .timer-fill{ transition:none; }
+      }
+    </style>
+  </head>
+  <body>
+    <main id="app">
+
+      <!-- ============ SCREEN: SETUP ============ -->
+      <section class="screen active" id="scr-setup">
+        <div class="title-wrap">
+          <svg class="sword-mark" viewBox="0 0 64 64" aria-hidden="true">
+            <path d="M32 3 L37 10 L35 34 L32 40 L29 34 L27 10 Z" fill="#e9e4d8" stroke="#9a917e" stroke-width="1.5"/>
+            <rect x="18" y="40" width="28" height="5" rx="2.5" fill="#d9a441" stroke="#a5761f" stroke-width="1.2"/>
+            <rect x="29.5" y="45" width="5" height="10" rx="2" fill="#7a4a21"/>
+            <circle cx="32" cy="58" r="3.4" fill="#d9a441" stroke="#a5761f" stroke-width="1.2"/>
+          </svg>
+          <h1 class="game-title">Sword in Hand</h1>
+          <p class="tagline">The classic Bible sword drill. <em>Swords ready… wait for the call!</em></p>
+        </div>
+
+        <div class="panel mt">
+          <p class="section-label">1 · Choose how you play</p>
+          <div class="opt-grid two" id="modeGrid">
+            <button type="button" class="mode-card" data-mode="real">
+              <span class="mc-title">Real Bible Mode <span class="mc-tag">Practice</span></span>
+              <p>The classic drill with your own paper Bible. After you tap FOUND IT, prove it your way — read it aloud, show a photo for a leader to check, or take a quick quiz — to unlock your points.</p>
+            </button>
+            <button type="button" class="mode-card" data-mode="app">
+              <span class="mc-title">In-App Find Mode <span class="mc-tag verified">Verified</span></span>
+              <p>No Bible handy? Race by tapping the right Book, Chapter, then Verse. Every tap is timed by the app, so these scores are fully verified.</p>
+            </button>
+          </div>
+
+          <p class="section-label mt-lg">2 · Difficulty</p>
+          <div class="chip-row" id="diffRow">
+            <button type="button" class="chip" data-diff="easy">Easy<small>90 sec a verse</small></button>
+            <button type="button" class="chip" data-diff="medium">Medium<small>60 sec a verse</small></button>
+            <button type="button" class="chip" data-diff="hard">Hard<small>45 sec a verse</small></button>
+            <button type="button" class="chip" data-diff="expert">Expert<small>30 sec · no hints</small></button>
+            <button type="button" class="chip" data-diff="mixed">Mixed<small>timer follows each verse</small></button>
+          </div>
+
+          <p class="section-label mt-lg">3 · Rounds</p>
+          <div class="chip-row" id="roundRow">
+            <button type="button" class="chip" data-rounds="5">5 rounds</button>
+            <button type="button" class="chip" data-rounds="10">10 rounds</button>
+          </div>
+
+          <p class="section-label mt-lg">4 · Which Bible are you using?</p>
+          <div class="chip-row" id="versionRow">
+            <button type="button" class="chip" data-version="NLT">NLT<small>New Living Translation</small></button>
+            <button type="button" class="chip" data-version="KJV">KJV<small>King James Version</small></button>
+            <button type="button" class="chip" data-version="ESV">ESV<small>English Standard</small></button>
+            <button type="button" class="chip" data-version="NIV">NIV<small>New International</small></button>
+            <button type="button" class="chip" data-version="Other">Another version</button>
+          </div>
+          <p class="small-note" style="text-align:left;">KJV is checked word-for-word. Other versions are checked on the verse's key words and content, never KJV wording.</p>
+
+          <div class="toggle-row mt-lg">
+            <div>
+              <div style="font-weight:800; font-size:1.02rem;">Spoken call</div>
+              <div style="color:var(--cream-dim); font-size:.9rem;">Hear “Sword in hand! Find…” out loud</div>
+            </div>
+            <button type="button" class="toggle" id="voiceToggle" role="switch" aria-checked="true" aria-label="Spoken call on or off"></button>
+          </div>
+
+          <div class="best-strip">
+            <div class="best-box"><div class="bb-num" id="bestVerified">—</div><div class="bb-lab">Best · Verified</div></div>
+            <div class="best-box"><div class="bb-num" id="bestPractice">—</div><div class="bb-lab">Best · Practice</div></div>
+          </div>
+        </div>
+
+        <div class="btn-row mt-lg">
+          <button type="button" class="btn btn-gold" id="startBtn">Start the Drill</button>
+          <button type="button" class="btn btn-brown" id="practiceBtn">Practice Round · John 4:5</button>
+        </div>
+
+        <details class="howto panel">
+          <summary>How to Play</summary>
+          <p><strong>The call.</strong> Every round starts the same way: <strong>“Sword in hand! Find John chapter 4, verse 5.”</strong> Nobody moves until the call — Bibles closed, swords down. Then the countdown starts and the race is on.</p>
+          <ul>
+            <li><strong>Real Bible Mode (Practice):</strong> find the verse in your own Bible and slam <strong>FOUND IT!</strong> Your points stay locked until you prove the find — one try, and the verse stays hidden until after the check. Three ways to prove it:</li>
+            <li><strong>Read It Aloud:</strong> read the verse out loud from your Bible — the app listens and checks it. The automatic check, and the strongest one.</li>
+            <li><strong>Photo Check:</strong> snap a photo of the open page and a leader (or another player) confirms it's the verse. The app itself does not read the photo — a person checks it.</li>
+            <li><strong>Quiz Proof:</strong> one quick question. For KJV it's about the exact words; for other versions it's about what the verse says.</li>
+            <li><strong>Using NLT or another version?</strong> Pick it in “Which Bible are you using?” above — you'll be checked on the verse's key words and content, not KJV wording.</li>
+            <li><strong>In-App Find Mode (Verified):</strong> tap the correct <strong>Book</strong>, then <strong>Chapter</strong>, then <strong>Verse</strong>. Wrong taps cost 5 points each, so accuracy counts.</li>
+            <li><strong>Scoring:</strong> the faster you find it, the more of the 100 points you keep. Streaks earn bonuses. Run out of time and the round scores 0 — but the verse is always revealed so you still learn it.</li>
+            <li><strong>Hints:</strong> Easy and Medium can show the testament and book family; Hard shows the testament only; Expert gets nothing. Using a hint costs 15 points.</li>
+          </ul>
+          <p>All verses are King James Version (KJV), word for word.</p>
+        </details>
+      </section>
+
+      <!-- ============ SCREEN: GET READY ============ -->
+      <section class="screen" id="scr-ready">
+        <div class="statusbar">
+          <span class="sb-pill" id="readyRoundPill">Round 1 of 5</span>
+          <span class="sb-pill" id="readyModePill">Practice</span>
+          <span class="spacer"></span>
+          <button type="button" class="icon-btn" id="readyQuit">Quit</button>
+        </div>
+        <div class="panel" style="text-align:center; padding:26px 18px;">
+          <svg class="sword-mark" viewBox="0 0 64 64" aria-hidden="true" style="width:52px;height:52px;">
+            <path d="M32 3 L37 10 L35 34 L32 40 L29 34 L27 10 Z" fill="#e9e4d8" stroke="#9a917e" stroke-width="1.5"/>
+            <rect x="18" y="40" width="28" height="5" rx="2.5" fill="#d9a441" stroke="#a5761f" stroke-width="1.2"/>
+            <rect x="29.5" y="45" width="5" height="10" rx="2" fill="#7a4a21"/>
+            <circle cx="32" cy="58" r="3.4" fill="#d9a441" stroke="#a5761f" stroke-width="1.2"/>
+          </svg>
+          <p class="ready-big">Get Ready!</p>
+          <p class="ready-sub" id="readySub">Bibles closed. Swords down.<br />Nobody moves until the call…</p>
+          <div class="count-num" id="countNum">3</div>
+        </div>
+      </section>
+
+      <!-- ============ SCREEN: SEARCH ============ -->
+      <section class="screen" id="scr-search">
+        <div class="statusbar">
+          <span class="sb-pill" id="searchRoundPill">Round 1 of 5</span>
+          <span class="sb-pill score" id="searchScorePill">Score 0</span>
+          <span class="spacer"></span>
+          <button type="button" class="icon-btn" id="pauseBtn">Pause</button>
+        </div>
+
+        <div class="timer-wrap">
+          <div class="timer-num"><span id="timerNum">90</span><span class="t-lab">seconds to find it</span></div>
+          <div class="timer-bar"><div class="timer-fill" id="timerFill"></div></div>
+        </div>
+
+        <div class="parchment call-card">
+          <p class="call-shout">Sword in Hand!</p>
+          <p class="call-find">Find</p>
+          <p class="call-ref" id="callRef">John 4:5</p>
+          <span class="call-diff" id="callDiff">Easy</span>
+          <div class="btn-row mt">
+            <button type="button" class="btn btn-brown" id="hearBtn" style="min-height:52px; font-size:1rem;">🔊 Hear It Again</button>
+          </div>
+          <div class="hint-line" id="hintZone">
+            <button type="button" class="btn btn-ghost" id="hintBtn" style="color:var(--ink); border-color:var(--leather); width:auto; display:inline-block; padding:10px 18px;">Show a hint (−15 pts)</button>
+            <div class="hint-text" id="hintText" style="color:var(--ink); background:rgba(122,74,33,.12);"></div>
+          </div>
+        </div>
+
+        <!-- Real Bible mode -->
+        <div id="realZone" class="mt-lg">
+          <button type="button" class="btn found-btn" id="foundBtn">FOUND IT!</button>
+          <p class="small-note">Tap the moment your eyes land on the verse in your Bible.<br />Then prove it: read it aloud, photo check, or a quick quiz.</p>
+        </div>
+
+        <!-- In-App mode -->
+        <div id="appZone" class="mt-lg" style="display:none;">
+          <div class="step-track">
+            <div class="st" id="stBook">1 · Book</div>
+            <div class="st" id="stChapter">2 · Chapter</div>
+            <div class="st" id="stVerse">3 · Verse</div>
+          </div>
+          <p class="crumb" id="crumb"><span class="dim">Start with the book…</span></p>
+          <p class="tap-feedback" id="tapFeedback" aria-live="polite"></p>
+          <div id="gridZone"></div>
+        </div>
+      </section>
+
+      <!-- ============ SCREEN: PROOF (Practice mode) ============ -->
+      <section class="screen" id="scr-proof">
+        <div class="statusbar">
+          <span class="sb-pill">Proof Check</span>
+          <span class="sb-pill score" id="proofLockedPill">Locked: 0 pts</span>
+          <span class="spacer"></span>
+          <span class="sb-pill" id="proofModePill">One try</span>
+        </div>
+        <div class="parchment">
+          <p class="proof-ref" id="proofRef">John 4:5</p>
+          <p style="text-align:center; margin:0 0 4px; color:var(--ink-soft); font-weight:700;">Found it in your Bible? Prove it — no peeking, the verse is still hidden.</p>
+          <div class="proof-timer" id="proofTimer">15</div>
+          <div id="proofBody" class="mt"></div>
+        </div>
+      </section>
+
+      <!-- ============ SCREEN: REVEAL ============ -->
+      <section class="screen" id="scr-reveal">
+        <div class="statusbar">
+          <span class="sb-pill" id="revealRoundPill">Round 1 of 5</span>
+          <span class="sb-pill score" id="revealScorePill">Score 0</span>
+          <span class="spacer"></span>
+        </div>
+        <div class="parchment">
+          <p class="verdict" id="verdictText">Found &amp; Proven!</p>
+          <p class="verdict-sub" id="verdictSub">You found it in 0:12</p>
+          <div style="border-top:1.5px dashed rgba(122,74,33,.4); padding-top:8px;">
+            <p class="section-label" id="revealVersionHead" style="color:var(--leather-dark); display:none; margin-bottom:2px;">KJV reference text</p>
+            <p class="verse-text" id="revealVerseText"></p>
+            <p class="verse-ref-line" id="revealVerseRef"></p>
+            <div id="revealKeyPoints" style="display:none;">
+              <p class="section-label" style="color:var(--leather-dark); margin:12px 0 2px;">Check for these key points</p>
+              <ul class="key-points" id="revealKeyList"></ul>
+            </div>
+          </div>
+          <div class="score-lines" id="scoreLines"></div>
+        </div>
+        <div class="btn-row mt-lg">
+          <button type="button" class="btn btn-gold" id="nextBtn">Next Round</button>
+        </div>
+      </section>
+
+      <!-- ============ SCREEN: RESULTS ============ -->
+      <section class="screen" id="scr-results">
+        <div class="title-wrap" style="padding-top:4px;">
+          <h2 class="game-title" style="font-size:1.9rem;">Drill Complete!</h2>
+          <p class="tagline" id="resultsModeLine">Verified Mode · Mixed · 5 rounds</p>
+        </div>
+        <p class="new-best" id="newBestLine" style="display:none;">★ New Best Score! ★</p>
+        <div class="stat-grid mt">
+          <div class="stat-box"><div class="sv" id="resScore">0</div><div class="sl2">Total Score</div></div>
+          <div class="stat-box"><div class="sv" id="resBestTime">—</div><div class="sl2">Best Find Time</div></div>
+          <div class="stat-box"><div class="sv" id="resAccuracy">—</div><div class="sl2">Clean Rounds</div></div>
+          <div class="stat-box"><div class="sv" id="resStreak">0</div><div class="sl2">Best Streak</div></div>
+        </div>
+
+        <div class="parchment">
+          <p class="section-label" style="color:var(--leather-dark);">Proven Finds</p>
+          <ul class="result-list" id="provenList"></ul>
+          <p class="empty-note" id="provenEmpty" style="display:none;">No proven finds this time — the next drill is yours.</p>
+          <p class="section-label mt" style="color:var(--leather-dark);">Not Proven / Timed Out</p>
+          <ul class="result-list" id="unprovenList"></ul>
+          <p class="empty-note" id="unprovenEmpty" style="display:none;">None — every round was proven. Sharp sword work!</p>
+        </div>
+
+        <p class="honest-note" id="honestNote"></p>
+
+        <div class="btn-row two mt">
+          <button type="button" class="btn btn-gold" id="againBtn">Play Again</button>
+          <button type="button" class="btn btn-ghost" id="settingsBtn">Change Settings</button>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Pause overlay -->
+    <div class="overlay" id="pauseOverlay">
+      <div class="panel">
+        <h2 class="display" style="text-align:center; color:var(--gold-bright); margin:4px 0 6px;">Paused</h2>
+        <p style="text-align:center; color:var(--cream-dim); margin:0 0 16px;">The countdown is stopped. Swords down!</p>
+        <div class="btn-row">
+          <button type="button" class="btn btn-gold" id="resumeBtn">Keep Going</button>
+          <button type="button" class="btn btn-ghost" id="quitBtn">Quit to Setup</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+    "use strict";
+    /* ================= DATA ================= */
+    // 66 books in Bible order: [name, chapters, testament, family]
+    var BOOKS = [
+      ["Genesis",50,"OT","The Law"],["Exodus",40,"OT","The Law"],["Leviticus",27,"OT","The Law"],["Numbers",36,"OT","The Law"],["Deuteronomy",34,"OT","The Law"],
+      ["Joshua",24,"OT","History"],["Judges",21,"OT","History"],["Ruth",4,"OT","History"],["1 Samuel",31,"OT","History"],["2 Samuel",24,"OT","History"],
+      ["1 Kings",22,"OT","History"],["2 Kings",25,"OT","History"],["1 Chronicles",29,"OT","History"],["2 Chronicles",36,"OT","History"],["Ezra",10,"OT","History"],
+      ["Nehemiah",13,"OT","History"],["Esther",10,"OT","History"],
+      ["Job",42,"OT","Poetry & Wisdom"],["Psalms",150,"OT","Poetry & Wisdom"],["Proverbs",31,"OT","Poetry & Wisdom"],["Ecclesiastes",12,"OT","Poetry & Wisdom"],["Song of Solomon",8,"OT","Poetry & Wisdom"],
+      ["Isaiah",66,"OT","Major Prophets"],["Jeremiah",52,"OT","Major Prophets"],["Lamentations",5,"OT","Major Prophets"],["Ezekiel",48,"OT","Major Prophets"],["Daniel",12,"OT","Major Prophets"],
+      ["Hosea",14,"OT","Minor Prophets"],["Joel",3,"OT","Minor Prophets"],["Amos",9,"OT","Minor Prophets"],["Obadiah",1,"OT","Minor Prophets"],["Jonah",4,"OT","Minor Prophets"],
+      ["Micah",7,"OT","Minor Prophets"],["Nahum",3,"OT","Minor Prophets"],["Habakkuk",3,"OT","Minor Prophets"],["Zephaniah",3,"OT","Minor Prophets"],["Haggai",2,"OT","Minor Prophets"],
+      ["Zechariah",14,"OT","Minor Prophets"],["Malachi",4,"OT","Minor Prophets"],
+      ["Matthew",28,"NT","The Gospels"],["Mark",16,"NT","The Gospels"],["Luke",24,"NT","The Gospels"],["John",21,"NT","The Gospels"],
+      ["Acts",28,"NT","Early Church History"],
+      ["Romans",16,"NT","Paul's Letters"],["1 Corinthians",16,"NT","Paul's Letters"],["2 Corinthians",13,"NT","Paul's Letters"],["Galatians",6,"NT","Paul's Letters"],
+      ["Ephesians",6,"NT","Paul's Letters"],["Philippians",4,"NT","Paul's Letters"],["Colossians",4,"NT","Paul's Letters"],["1 Thessalonians",5,"NT","Paul's Letters"],
+      ["2 Thessalonians",3,"NT","Paul's Letters"],["1 Timothy",6,"NT","Paul's Letters"],["2 Timothy",4,"NT","Paul's Letters"],["Titus",3,"NT","Paul's Letters"],["Philemon",1,"NT","Paul's Letters"],
+      ["Hebrews",13,"NT","Letters to Everyone"],["James",5,"NT","Letters to Everyone"],["1 Peter",5,"NT","Letters to Everyone"],["2 Peter",3,"NT","Letters to Everyone"],
+      ["1 John",5,"NT","Letters to Everyone"],["2 John",1,"NT","Letters to Everyone"],["3 John",1,"NT","Letters to Everyone"],["Jude",1,"NT","Letters to Everyone"],
+      ["Revelation",22,"NT","Prophecy"]
+    ];
+    var BOOKMAP = {};
+    BOOKS.forEach(function(b){ BOOKMAP[b[0]] = { chapters:b[1], testament:b[2], family:b[3] }; });
+
+    // Verse library — exact KJV text. v = verses in that chapter (for the verse grid).
+    var VERSES = [
+      /* ---- EASY ---- */
+      {b:"Genesis",c:1,v:1,vc:31,d:"easy",t:"In the beginning God created the heaven and the earth."},
+      {b:"Genesis",c:1,v:27,vc:31,d:"easy",t:"So God created man in his own image, in the image of God created he him; male and female created he them."},
+      {b:"Psalms",c:23,v:1,vc:6,d:"easy",t:"The LORD is my shepherd; I shall not want."},
+      {b:"Psalms",c:46,v:1,vc:11,d:"easy",t:"God is our refuge and strength, a very present help in trouble."},
+      {b:"Psalms",c:118,v:24,vc:29,d:"easy",t:"This is the day which the LORD hath made; we will rejoice and be glad in it."},
+      {b:"Proverbs",c:3,v:5,vc:35,d:"easy",t:"Trust in the LORD with all thine heart; and lean not unto thine own understanding."},
+      {b:"Isaiah",c:40,v:31,vc:31,d:"easy",t:"But they that wait upon the LORD shall renew their strength; they shall mount up with wings as eagles; they shall run, and not be weary; and they shall walk, and not faint."},
+      {b:"Jeremiah",c:29,v:11,vc:32,d:"easy",t:"For I know the thoughts that I think toward you, saith the LORD, thoughts of peace, and not of evil, to give you an expected end."},
+      {b:"Joshua",c:1,v:9,vc:18,d:"easy",t:"Have not I commanded thee? Be strong and of a good courage; be not afraid, neither be thou dismayed: for the LORD thy God is with thee whithersoever thou goest."},
+      {b:"Micah",c:6,v:8,vc:16,d:"easy",t:"He hath shewed thee, O man, what is good; and what doth the LORD require of thee, but to do justly, and to love mercy, and to walk humbly with thy God?"},
+      {b:"Matthew",c:6,v:33,vc:34,d:"easy",t:"But seek ye first the kingdom of God, and his righteousness; and all these things shall be added unto you."},
+      {b:"John",c:1,v:1,vc:51,d:"easy",t:"In the beginning was the Word, and the Word was with God, and the Word was God."},
+      {b:"John",c:3,v:16,vc:36,d:"easy",t:"For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life."},
+      {b:"John",c:14,v:6,vc:31,d:"easy",t:"Jesus saith unto him, I am the way, the truth, and the life: no man cometh unto the Father, but by me."},
+      {b:"Romans",c:8,v:28,vc:39,d:"easy",t:"And we know that all things work together for good to them that love God, to them who are the called according to his purpose."},
+      {b:"Philippians",c:4,v:13,vc:23,d:"easy",t:"I can do all things through Christ which strengtheneth me."},
+      /* ---- MEDIUM ---- */
+      {b:"Psalms",c:121,v:1,vc:8,d:"medium",t:"I will lift up mine eyes unto the hills, from whence cometh my help."},
+      {b:"Psalms",c:121,v:2,vc:8,d:"medium",t:"My help cometh from the LORD, which made heaven and earth."},
+      {b:"Isaiah",c:53,v:5,vc:12,d:"medium",t:"But he was wounded for our transgressions, he was bruised for our iniquities: the chastisement of our peace was upon him; and with his stripes we are healed."},
+      {b:"Ecclesiastes",c:3,v:1,vc:22,d:"medium",t:"To every thing there is a season, and a time to every purpose under the heaven:"},
+      {b:"Lamentations",c:3,v:23,vc:66,d:"medium",t:"They are new every morning: great is thy faithfulness."},
+      {b:"Matthew",c:11,v:28,vc:30,d:"medium",t:"Come unto me, all ye that labour and are heavy laden, and I will give you rest."},
+      {b:"Luke",c:2,v:10,vc:52,d:"medium",t:"And the angel said unto them, Fear not: for, behold, I bring you good tidings of great joy, which shall be to all people."},
+      {b:"Acts",c:1,v:8,vc:26,d:"medium",t:"But ye shall receive power, after that the Holy Ghost is come upon you: and ye shall be witnesses unto me both in Jerusalem, and in all Judaea, and in Samaria, and unto the uttermost part of the earth."},
+      {b:"1 Corinthians",c:13,v:4,vc:13,d:"medium",t:"Charity suffereth long, and is kind; charity envieth not; charity vaunteth not itself, is not puffed up,"},
+      {b:"Ephesians",c:2,v:8,vc:22,d:"medium",t:"For by grace are ye saved through faith; and that not of yourselves: it is the gift of God:"},
+      {b:"Galatians",c:5,v:22,vc:26,d:"medium",t:"But the fruit of the Spirit is love, joy, peace, longsuffering, gentleness, goodness, faith,"},
+      {b:"Romans",c:12,v:2,vc:21,d:"medium",t:"And be not conformed to this world: but be ye transformed by the renewing of your mind, that ye may prove what is that good, and acceptable, and perfect, will of God."},
+      {b:"Hebrews",c:11,v:1,vc:40,d:"medium",t:"Now faith is the substance of things hoped for, the evidence of things not seen."},
+      {b:"James",c:1,v:17,vc:27,d:"medium",t:"Every good gift and every perfect gift is from above, and cometh down from the Father of lights, with whom is no variableness, neither shadow of turning."},
+      {b:"1 Peter",c:5,v:7,vc:14,d:"medium",t:"Casting all your care upon him; for he careth for you."},
+      {b:"Proverbs",c:18,v:10,vc:24,d:"medium",t:"The name of the LORD is a strong tower: the righteous runneth into it, and is safe."},
+      /* ---- HARD ---- */
+      {b:"Deuteronomy",c:31,v:8,vc:30,d:"hard",t:"And the LORD, he it is that doth go before thee; he will be with thee, he will not fail thee, neither forsake thee: fear not, neither be dismayed."},
+      {b:"1 Samuel",c:16,v:7,vc:23,d:"hard",t:"But the LORD said unto Samuel, Look not on his countenance, or on the height of his stature; because I have refused him: for the LORD seeth not as man seeth; for man looketh on the outward appearance, but the LORD looketh on the heart."},
+      {b:"2 Chronicles",c:7,v:14,vc:22,d:"hard",t:"If my people, which are called by my name, shall humble themselves, and pray, and seek my face, and turn from their wicked ways; then will I hear from heaven, and will forgive their sin, and will heal their land."},
+      {b:"Ezra",c:7,v:10,vc:28,d:"hard",t:"For Ezra had prepared his heart to seek the law of the LORD, and to do it, and to teach in Israel statutes and judgments."},
+      {b:"Nehemiah",c:8,v:10,vc:18,d:"hard",t:"Then he said unto them, Go your way, eat the fat, and drink the sweet, and send portions unto them for whom nothing is prepared: for this day is holy unto our Lord: neither be ye sorry; for the joy of the LORD is your strength."},
+      {b:"Ezekiel",c:37,v:3,vc:28,d:"hard",t:"And he said unto me, Son of man, can these bones live? And I answered, O Lord GOD, thou knowest."},
+      {b:"Ruth",c:1,v:16,vc:22,d:"hard",t:"And Ruth said, Intreat me not to leave thee, or to return from following after thee: for whither thou goest, I will go; and where thou lodgest, I will lodge: thy people shall be my people, and thy God my God:"},
+      {b:"Job",c:19,v:25,vc:29,d:"hard",t:"For I know that my redeemer liveth, and that he shall stand at the latter day upon the earth:"},
+      {b:"Numbers",c:6,v:24,vc:27,d:"hard",t:"The LORD bless thee, and keep thee:"},
+      {b:"Habakkuk",c:2,v:4,vc:20,d:"hard",t:"Behold, his soul which is lifted up is not upright in him: but the just shall live by his faith."},
+      {b:"Zephaniah",c:3,v:17,vc:20,d:"hard",t:"The LORD thy God in the midst of thee is mighty; he will save, he will rejoice over thee with joy; he will rest in his love, he will joy over thee with singing."},
+      {b:"Amos",c:5,v:24,vc:27,d:"hard",t:"But let judgment run down as waters, and righteousness as a mighty stream."},
+      {b:"Colossians",c:3,v:23,vc:25,d:"hard",t:"And whatsoever ye do, do it heartily, as to the Lord, and not unto men;"},
+      {b:"2 Timothy",c:3,v:16,vc:17,d:"hard",t:"All scripture is given by inspiration of God, and is profitable for doctrine, for reproof, for correction, for instruction in righteousness:"},
+      /* ---- EXPERT ---- */
+      {b:"Obadiah",c:1,v:4,vc:21,d:"expert",t:"Though thou exalt thyself as the eagle, and though thou set thy nest among the stars, thence will I bring thee down, saith the LORD."},
+      {b:"Nahum",c:1,v:7,vc:15,d:"expert",t:"The LORD is good, a strong hold in the day of trouble; and he knoweth them that trust in him."},
+      {b:"Haggai",c:2,v:9,vc:23,d:"expert",t:"The glory of this latter house shall be greater than of the former, saith the LORD of hosts: and in this place will I give peace, saith the LORD of hosts."},
+      {b:"Hosea",c:6,v:6,vc:11,d:"expert",t:"For I desired mercy, and not sacrifice; and the knowledge of God more than burnt offerings."},
+      {b:"Malachi",c:3,v:10,vc:18,d:"expert",t:"Bring ye all the tithes into the storehouse, that there may be meat in mine house, and prove me now herewith, saith the LORD of hosts, if I will not open you the windows of heaven, and pour you out a blessing, that there shall not be room enough to receive it."},
+      {b:"Joel",c:2,v:13,vc:32,d:"expert",t:"And rend your heart, and not your garments, and turn unto the LORD your God: for he is gracious and merciful, slow to anger, and of great kindness, and repenteth him of the evil."},
+      {b:"Zechariah",c:4,v:6,vc:14,d:"expert",t:"Then he answered and spake unto me, saying, This is the word of the LORD unto Zerubbabel, saying, Not by might, nor by power, but by my spirit, saith the LORD of hosts."},
+      {b:"Song of Solomon",c:2,v:16,vc:17,d:"expert",t:"My beloved is mine, and I am his: he feedeth among the lilies."},
+      {b:"2 John",c:1,v:6,vc:13,d:"expert",t:"And this is love, that we walk after his commandments. This is the commandment, That, as ye have heard from the beginning, ye should walk in it."},
+      {b:"3 John",c:1,v:2,vc:14,d:"expert",t:"Beloved, I wish above all things that thou mayest prosper and be in health, even as thy soul prospereth."},
+      {b:"Jude",c:1,v:24,vc:25,d:"expert",t:"Now unto him that is able to keep you from falling, and to present you faultless before the presence of his glory with exceeding joy,"}
+    ];
+    var PRACTICE_VERSE = {b:"John",c:4,v:5,vc:54,d:"easy",t:"Then cometh he to a city of Samaria, which is called Sychar, near to the parcel of ground that Jacob gave to his son Joseph."};
+
+    var TIME_LIMITS = { easy:90, medium:60, hard:45, expert:30, practice:90 };
+    var DIFF_LABEL = { easy:"Easy", medium:"Medium", hard:"Hard", expert:"Expert" };
+    var PROOF_SECONDS = 15;
+    var READ_SECONDS = 30;
+    var METHOD_LABEL = { read:"Read Aloud", photo:"Photo Check", quiz:"Quiz" };
+
+    function isKJV(){ return settings.version === "KJV"; }
+    function keyOf(v){ return v.b + "|" + v.c + "|" + v.v; }
+
+    /* Key words + content questions per verse. k = [label, [synonyms]] groups that hold
+       across translations; cq = [question, correct, [wrong, wrong]]. Used for non-KJV
+       Read Aloud checks, non-KJV quiz questions, and the "key points" lists. */
+    var KEYDATA = {
+    "Genesis|1|1":{k:[["In the beginning",["beginning"]],["God",["god"]],["created",["created","made"]],["heaven",["heaven","heavens"]],["the earth",["earth"]]],cq:["What did God create in the beginning?","The heaven and the earth",["The angels and the stars","Man and woman"]]},
+    "Genesis|1|27":{k:[["God",["god"]],["created",["created","made"]],["humankind",["man","mankind","humankind","human beings","people"]],["in God's image",["image"]],["male",["male"]],["female",["female"]]],cq:["In whose image did God create people?","God's own image",["The image of the angels","The image of the animals"]]},
+    "Psalms|23|1":{k:[["the LORD",["lord"]],["my shepherd",["shepherd"]],["I shall not want",["want","lack","need","nothing"]]],cq:["Who is the writer's shepherd?","The LORD",["David","A priest of the temple"]]},
+    "Psalms|46|1":{k:[["God",["god"]],["refuge",["refuge","shelter"]],["strength",["strength"]],["help",["help"]],["in trouble",["trouble"]]],cq:["God is our refuge and strength, and a present what in trouble?","Help",["Judge","King"]]},
+    "Psalms|118|24":{k:[["this day",["day"]],["the LORD",["lord"]],["made it",["made","created"]],["rejoice",["rejoice","joyful","celebrate"]],["be glad",["glad","joy"]]],cq:["Who made this day?","The LORD",["We did","The sunrise"]]},
+    "Proverbs|3|5":{k:[["Trust",["trust"]],["in the LORD",["lord"]],["with all your heart",["heart"]],["do not lean",["lean","depend","rely"]],["on your own understanding",["understanding","insight"]]],cq:["What must you NOT lean on?","Your own understanding",["The LORD","Wise counsel"]]},
+    "Isaiah|40|31":{k:[["wait on the LORD",["wait","trust","hope"]],["renew their strength",["strength","power"]],["wings like eagles",["eagles","eagle"]],["run and not be weary",["run"]],["walk and not faint",["walk"]]],cq:["Those who wait on the LORD will mount up on wings like what?","Eagles",["Doves","Sparrows"]]},
+    "Jeremiah|29|11":{k:[["plans",["plans","thoughts"]],["for good / peace",["peace","good","prosper"]],["not for harm",["harm","evil","disaster"]],["a future",["future"]],["and a hope",["hope"]]],cq:["God's plans for His people are plans of what?","Good and hope, not harm",["Wealth and fame","Judgment and fear"]]},
+    "Joshua|1|9":{k:[["Be strong",["strong"]],["and courageous",["courage","courageous","brave"]],["do not be afraid",["afraid","fear","terrified"]],["the LORD your God",["lord"]],["is with you wherever you go",["with you","go"]]],cq:["Why can Joshua be strong and unafraid?","The LORD his God is with him wherever he goes",["His army is the largest","The enemy is weak"]]},
+    "Micah|6|8":{k:[["do justly",["justly","justice","right"]],["love mercy",["mercy","kindness"]],["walk",["walk"]],["humbly",["humbly","humble"]],["with your God",["god"]]],cq:["Which of these does the LORD require of you?","To walk humbly with your God",["To offer a thousand sacrifices","To build Him a temple"]]},
+    "Matthew|6|33":{k:[["Seek first",["seek","first"]],["the kingdom",["kingdom"]],["of God",["god"]],["His righteousness",["righteousness","right living"]]],cq:["What should we seek first?","The kingdom of God and His righteousness",["Food and clothing","Riches for ourselves"]]},
+    "John|1|1":{k:[["In the beginning",["beginning"]],["the Word",["word"]],["was with God",["with god"]],["the Word was God",["was god"]]],cq:["In the beginning, where was the Word?","With God — and the Word was God",["With the angels","Hidden in the temple"]]},
+    "John|3|16":{k:[["God",["god"]],["so loved",["loved","love"]],["the world",["world"]],["gave His only Son",["gave","son","one and only"]],["whoever believes",["believes","believe","believeth"]],["shall not perish",["perish","die"]],["everlasting life",["everlasting life","eternal life","life"]]],cq:["Because God loved the world, what did He give?","His only Son",["The Law on tablets","A new temple"]]},
+    "John|14|6":{k:[["the way",["way"]],["the truth",["truth"]],["the life",["life"]],["the Father",["father"]]],cq:["Jesus said, \u201CI am the way, the truth, and the\u2026\u201D","Life",["Light","Door"]]},
+    "Romans|8|28":{k:[["all things",["all things","everything"]],["work together",["work together","works together","work out"]],["for good",["good"]],["those who love God",["love god","love him"]],["His purpose",["purpose"]]],cq:["All things work together for good to those who\u2026?","Love God",["Work the hardest","Never suffer"]]},
+    "Philippians|4|13":{k:[["I can do all things",["all things","everything"]],["through Christ",["christ"]],["who strengthens me",["strengthens","strength","gives me strength"]]],cq:["Through whom can Paul do all things?","Christ, who strengthens him",["His own training","The Roman church"]]},
+    "Psalms|121|1":{k:[["lift up my eyes",["eyes","look up","lift"]],["to the hills",["hills","mountains"]],["my help",["help"]]],cq:["Where does the writer lift up his eyes?","To the hills (mountains)",["To the city gates","To the sea"]]},
+    "Psalms|121|2":{k:[["My help",["help"]],["comes from the LORD",["lord"]],["maker of heaven and earth",["heaven","earth","made","maker"]]],cq:["From whom does my help come?","The LORD, who made heaven and earth",["The hills themselves","My own strength"]]},
+    "Isaiah|53|5":{k:[["wounded / pierced",["wounded","pierced","beaten","crushed"]],["for our transgressions",["transgressions","sins","rebellion"]],["by His stripes / wounds",["stripes","wounds","suffering"]],["we are healed",["healed","whole","healing"]]],cq:["By His stripes (wounds) we are\u2026?","Healed",["Judged","Hidden away"]]},
+    "Ecclesiastes|3|1":{k:[["a season",["season"]],["a time",["time"]],["for every purpose",["purpose","activity","thing"]],["under heaven",["heaven","sky"]]],cq:["There is a season and a time for every what under heaven?","Purpose (activity)",["Harvest only","A king's decree"]]},
+    "Lamentations|3|23":{k:[["new",["new","afresh","begin"]],["every morning",["morning","mornings"]],["great is Thy faithfulness",["faithfulness","faithful"]]],cq:["How often are they new?","Every morning",["Every year","Every Sabbath"]]},
+    "Matthew|11|28":{k:[["Come to Me",["come"]],["all who labour / are weary",["weary","labour","labor","tired"]],["heavy laden / burdened",["burden","burdens","heavy"]],["I will give you rest",["rest"]]],cq:["What does Jesus promise the weary and burdened?","Rest",["More work to do","Riches"]]},
+    "Luke|2|10":{k:[["the angel",["angel"]],["Fear not",["fear not","not be afraid","do not be afraid"]],["good tidings / good news",["good news","good tidings","news"]],["great joy",["joy"]],["for all people",["all people","all the people","everyone"]]],cq:["Who brought the good news of great joy?","An angel",["A shepherd","King Herod"]]},
+    "Acts|1|8":{k:[["receive power",["power"]],["the Holy Spirit",["holy spirit","holy ghost"]],["My witnesses",["witnesses","witness"]],["Jerusalem",["jerusalem"]],["Samaria",["samaria"]],["the ends of the earth",["earth","world"]]],cq:["What will you receive when the Holy Spirit comes upon you?","Power",["A sword","A signet ring"]]},
+    "1 Corinthians|13|4":{k:[["Love / charity",["love","charity"]],["is patient",["patient","suffereth long","long suffering","longsuffering"]],["and kind",["kind"]],["does not envy",["envy","envieth","jealous"]]],cq:["Love is patient, and love is\u2026?","Kind",["Proud","Quick to anger"]]},
+    "Ephesians|2|8":{k:[["by grace",["grace"]],["you are saved",["saved","salvation"]],["through faith",["faith"]],["the gift of God",["gift","god"]]],cq:["We are saved by grace through what?","Faith — it is the gift of God",["Our good works","Our offerings"]]},
+    "Galatians|5|22":{k:[["the fruit",["fruit"]],["of the Spirit",["spirit"]],["love",["love"]],["joy",["joy"]],["peace",["peace"]]],cq:["What is the first fruit of the Spirit named?","Love",["Faith","Power"]]},
+    "Romans|12|2":{k:[["not conformed",["conformed","copy","pattern"]],["to this world",["world"]],["be transformed",["transformed","changed"]],["renewing of your mind",["mind","renewing","renew"]]],cq:["Be transformed by the renewing of your\u2026?","Mind",["Wardrobe","Schedule"]]},
+    "Hebrews|11|1":{k:[["Faith",["faith"]],["things hoped for",["hope","hoped"]],["things not seen",["not seen","cannot see","unseen"]]],cq:["Faith is the evidence (assurance) of things\u2026?","Not seen",["Long forgotten","Already finished"]]},
+    "James|1|17":{k:[["every good gift",["good","gift","gifts"]],["every perfect gift",["perfect"]],["from above",["above","heaven","father"]],["the Father",["father"]]],cq:["Every good and perfect gift comes from where?","From above — from the Father",["From our own hands","From the temple storehouse"]]},
+    "1 Peter|5|7":{k:[["Cast / give all your care",["cast","give","throw"]],["all your cares / worries",["care","cares","worries","anxiety","concerns"]],["He cares for you",["cares for you","cares about you","he cares"]]],cq:["Why should we cast all our care on Him?","Because He cares for us",["Because He is far away","To earn His favour"]]},
+    "Proverbs|18|10":{k:[["The name of the LORD",["name","lord"]],["a strong tower",["strong tower","fortress","strong fortress","refuge"]],["the righteous run to it",["righteous","run"]],["and are safe",["safe","safety"]]],cq:["The name of the LORD is compared to what?","A strong tower (fortress)",["A deep well","A high mountain"]]},
+    "Deuteronomy|31|8":{k:[["the LORD",["lord"]],["goes before you",["before","ahead"]],["will be with you",["with you"]],["will not fail you",["fail"]],["nor forsake you",["forsake","leave","abandon"]],["do not fear",["fear","afraid","dismayed"]]],cq:["What will the LORD never do?","Fail you or forsake (leave) you",["Speak to you","Lead you"]]},
+    "1 Samuel|16|7":{k:[["the LORD",["lord"]],["looks at the heart",["heart"]],["not the outward appearance",["appearance","outward","looks","stature","height"]],["man looks",["man","people"]]],cq:["People look at the outward appearance, but the LORD looks at the\u2026?","Heart",["Height","Clothing"]]},
+    "2 Chronicles|7|14":{k:[["My people",["my people","people"]],["humble themselves",["humble","humility"]],["and pray",["pray","prayer"]],["seek My face",["seek","face"]],["turn from their wicked ways",["turn","wicked","evil ways"]],["forgive their sin",["forgive","sin"]],["heal their land",["heal","land"]]],cq:["If God's people humble themselves, pray, and turn, what will He do?","Hear them, forgive their sin, and heal their land",["Give them a bigger army","Move them to another land"]]},
+    "Ezra|7|10":{k:[["Ezra",["ezra"]],["set his heart",["heart","determined","devoted"]],["to seek / study the law",["law","seek","study"]],["to do it / obey it",["do it","obey","practice"]],["and to teach",["teach"]],["in Israel",["israel"]]],cq:["What did Ezra set his heart to do?","Seek (study) the law of the LORD, obey it, and teach it",["Rebuild the city wall","Collect the king's taxes"]]},
+    "Nehemiah|8|10":{k:[["the joy",["joy"]],["of the LORD",["lord"]],["is your strength",["strength","stronghold"]]],cq:["What is your strength, says this verse?","The joy of the LORD",["A good meal","The rebuilt wall"]]},
+    "Ezekiel|37|3":{k:[["Son of man",["son of man"]],["these bones",["bones"]],["can they live?",["live","come to life","come alive"]],["You know, Lord",["know","knowest","you alone know"]]],cq:["What did God ask Ezekiel in the valley?","\u201CCan these bones live?\u201D",["\u201CCan this city be rebuilt?\u201D","\u201CCan this river run dry?\u201D"]]},
+    "Ruth|1|16":{k:[["Where you go, I will go",["go"]],["where you stay, I will stay",["stay","lodge","live","remain"]],["your people shall be my people",["your people","my people"]],["your God, my God",["your god","my god"]]],cq:["What did Ruth promise Naomi?","Where you go I will go; your people will be my people, and your God my God",["That she would return to her own family","That she would send food every year"]]},
+    "Job|19|25":{k:[["I know",["know"]],["my Redeemer",["redeemer"]],["lives",["lives","liveth","alive"]],["will stand on the earth",["stand","earth"]]],cq:["What does Job know about his Redeemer?","He lives",["He has forgotten Job","He lives far away"]]},
+    "Numbers|6|24":{k:[["The LORD",["lord"]],["bless you",["bless"]],["and keep you",["keep","protect","guard"]]],cq:["\u201CThe LORD bless you and\u2026\u201D","Keep you",["Send you","Teach you"]]},
+    "Habakkuk|2|4":{k:[["the just / righteous",["just","righteous"]],["shall live",["live"]],["by faith",["faith","faithfulness"]]],cq:["The just (righteous) shall live by\u2026?","Faith (faithfulness)",["Their wealth","Their own strength"]]},
+    "Zephaniah|3|17":{k:[["The LORD your God",["lord","god"]],["is mighty",["mighty","warrior","powerful"]],["He will save",["save","victory","deliver"]],["rejoice over you",["rejoice","delight"]],["with singing",["singing","songs","joy"]]],cq:["The LORD will rejoice over you with\u2026?","Singing (joy)",["Trumpets only","Silence"]]},
+    "Amos|5|24":{k:[["let justice",["justice","judgment"]],["run down like waters",["waters","river","stream"]],["righteousness",["righteousness"]],["like a mighty stream",["stream","river","flowing"]]],cq:["Let justice roll on like what?","Waters — a never-failing stream",["Sand in the desert","Stones down a hill"]]},
+    "Colossians|3|23":{k:[["Whatever you do",["whatever","whatsoever","work","anything"]],["do it heartily",["heartily","with all your heart","wholeheartedly"]],["for the Lord",["lord","master"]],["not for men",["men","people","human masters"]]],cq:["Whatever you do, work at it as working for whom?","The Lord, not for men",["Yourself alone","Only your earthly master"]]},
+    "2 Timothy|3|16":{k:[["All Scripture",["scripture","scriptures"]],["given by inspiration of God / God-breathed",["inspiration","inspired","god breathed","breathed out"]],["profitable / useful",["profitable","useful"]],["for teaching / doctrine",["teaching","doctrine","instruction"]]],cq:["All Scripture is given by what?","Inspiration of God (God-breathed)",["The apostles' own ideas","Tradition alone"]]},
+    "Obadiah|1|4":{k:[["like the eagle",["eagle","eagles"]],["your nest",["nest"]],["among the stars",["stars"]],["I will bring you down",["bring you down","bring thee down","crashing down","down"]]],cq:["Though you set your nest among the stars, the LORD will\u2026?","Bring you down",["Leave you there in peace","Bless you there"]]},
+    "Nahum|1|7":{k:[["The LORD is good",["good","lord"]],["a stronghold in trouble",["stronghold","strong hold","refuge","fortress"]],["the day of trouble",["trouble","distress"]],["He knows those who trust Him",["trust","knows","take refuge"]]],cq:["The LORD is a stronghold (refuge) in the day of\u2026?","Trouble",["Plenty","The feast"]]},
+    "Haggai|2|9":{k:[["The glory",["glory"]],["of this latter house / temple",["house","temple"]],["will be greater",["greater"]],["I will give peace",["peace"]],["in this place",["place"]]],cq:["What will be greater about the latter house (temple)?","Its glory",["Its size","Its gold"]]},
+    "Hosea|6|6":{k:[["I desire mercy",["mercy","love","kindness"]],["not sacrifice",["sacrifice","sacrifices"]],["the knowledge of God",["knowledge","acknowledge"]],["more than burnt offerings",["burnt offerings","offerings"]]],cq:["God desires mercy, and not\u2026?","Sacrifice",["Praise","Prayer"]]},
+    "Malachi|3|10":{k:[["Bring all the tithes",["tithes","tithe","tenth"]],["into the storehouse",["storehouse"]],["open the windows of heaven",["windows","floodgates","heaven"]],["pour out a blessing",["blessing","pour"]]],cq:["Bring all the tithes into the\u2026?","Storehouse",["Temple courtyard","Marketplace"]]},
+    "Joel|2|13":{k:[["Rend / tear your heart",["rend","tear","heart"]],["not your garments",["garments","clothes","clothing"]],["return to the LORD",["return","turn"]],["gracious and merciful",["gracious","merciful","compassionate"]],["slow to anger",["slow to anger","anger"]]],cq:["Rend (tear) your heart, and not your\u2026?","Garments (clothes)",["Scrolls","Sandals"]]},
+    "Zechariah|4|6":{k:[["Not by might",["might","force"]],["nor by power",["power"]],["but by My Spirit",["spirit"]],["says the LORD of hosts",["lord of hosts","lord"]]],cq:["\u201CNot by might, nor by power, but by My\u2026\u201D","Spirit",["Sword","Army"]]},
+    "Song of Solomon|2|16":{k:[["My beloved",["beloved"]],["is mine",["mine"]],["I am his",["his"]],["among the lilies",["lilies","lily"]]],cq:["\u201CMy beloved is mine, and I am\u2026\u201D","His",["Free","The lilies'"]]},
+    "2 John|1|6":{k:[["This is love",["love"]],["walk",["walk","live","follow"]],["after His commandments",["commandments","commands","commanded"]]],cq:["This is love: that we walk according to His\u2026?","Commandments",["Feelings","Traditions"]]},
+    "3 John|1|2":{k:[["I wish / pray",["wish","pray","hope"]],["that you may prosper",["prosper","go well","succeed"]],["and be in health",["health","healthy","well"]],["as your soul prospers",["soul","spiritually"]]],cq:["What does John wish (pray) for his friend?","To prosper and be in health, just as his soul prospers",["To travel to Jerusalem soon","To grow rich quickly"]]},
+    "Jude|1|24":{k:[["Him who is able",["able"]],["to keep you",["keep","keep you"]],["from falling / stumbling",["falling","stumbling","fall"]],["present you faultless",["faultless","blameless","without fault"]],["with great joy",["joy","glory"]]],cq:["God is able to keep you from\u2026?","Falling (stumbling)",["Every trial","Growing old"]]},
+    "John|4|5":{k:[["Sychar",["sychar"]],["in Samaria",["samaria","samaritan"]],["Jacob",["jacob"]],["his son Joseph",["joseph"]],["the plot of ground",["field","land","ground","parcel","plot","piece of land"]]],cq:["Who gave the plot of ground (field) to his son Joseph?","Jacob",["Abraham","Isaac"]]}
+    };
+    function keyDataFor(v){
+      var kd = KEYDATA[keyOf(v)];
+      if(kd) return kd;
+      // safety net: derive key words from the KJV text itself
+      var seen = {}, groups = [];
+      v.t.replace(/[^A-Za-z\s]/g, "").split(/\s+/).forEach(function(w){
+        var lw = w.toLowerCase();
+        if(w.length >= 5 && !seen[lw]){ seen[lw] = 1; groups.push([w, [lw]]); }
+      });
+      return { k: groups.slice(0, 5), cq: null };
+    }
+
+    /* speech-to-text normalisation: archaic KJV words map to modern equivalents so a
+       recogniser hearing "you" for "thee" (etc.) still scores fairly */
+    var ARCHAIC = { thee:"you", thou:"you", thy:"your", thine:"your", ye:"you", hath:"has", hast:"has", saith:"says", doth:"does", whosoever:"whoever", believeth:"believes", cometh:"comes", liveth:"lives", goest:"goes", shewed:"showed", whithersoever:"wherever", envieth:"envies", suffereth:"suffers", runneth:"runs", laboureth:"labours" };
+    function normTokens(text){
+      return (text || "").toLowerCase().replace(/[^a-z0-9\s]/g, " ").split(/\s+/).filter(Boolean).map(function(w){ return ARCHAIC[w] || w; });
+    }
+    function normString(text){ return normTokens(text).join(" "); }
+    function lcsLen(a, b){
+      var prev = [], cur = [], i, j;
+      for(j = 0; j <= b.length; j++) prev[j] = 0;
+      for(i = 1; i <= a.length; i++){
+        cur[0] = 0;
+        for(j = 1; j <= b.length; j++){
+          cur[j] = a[i-1] === b[j-1] ? prev[j-1] + 1 : Math.max(prev[j], cur[j-1]);
+        }
+        var t = prev; prev = cur; cur = t;
+      }
+      return prev[b.length];
+    }
+
+    /* ================= HELPERS ================= */
+    function $(id){ return document.getElementById(id); }
+    function shuffle(a){ for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+    function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+    function isSingleChapter(book){ return BOOKMAP[book] && BOOKMAP[book].chapters === 1; }
+    function refOf(v){ return isSingleChapter(v.b) ? (v.b + " " + v.v) : (v.b + " " + v.c + ":" + v.v); }
+    function spokenBook(book){
+      var s = book.replace(/^1 /,"First ").replace(/^2 /,"Second ").replace(/^3 /,"Third ");
+      if(s === "Psalms") s = "Psalm";
+      return s;
+    }
+    function spokenRef(v){
+      if(isSingleChapter(v.b)) return spokenBook(v.b) + ", verse " + v.v;
+      return spokenBook(v.b) + " chapter " + v.c + ", verse " + v.v;
+    }
+    function fmtTime(sec){
+      sec = Math.max(0, Math.round(sec));
+      var m = Math.floor(sec/60), s = sec%60;
+      return m + ":" + (s<10 ? "0"+s : s);
+    }
+
+    /* ================= SETTINGS / STORAGE ================= */
+    var store = {
+      get:function(){ try { return JSON.parse(localStorage.getItem("swordInHand") || "{}"); } catch(e){ return {}; } },
+      set:function(obj){ try { localStorage.setItem("swordInHand", JSON.stringify(obj)); } catch(e){} }
+    };
+    var saved = store.get();
+    var settings = {
+      mode: saved.mode || "real",
+      diff: saved.diff || "easy",
+      rounds: saved.rounds || 5,
+      version: saved.version || "NLT",
+      voice: saved.voice !== false
+    };
+    var best = saved.best || { verified:0, practice:0 };
+
+    function persist(){
+      var s = store.get();
+      s.mode = settings.mode; s.diff = settings.diff; s.rounds = settings.rounds; s.version = settings.version; s.voice = settings.voice; s.best = best;
+      store.set(s);
+    }
+
+    /* ================= SPEECH ================= */
+    var currentCall = "";
+    function speakCall(){
+      if(!settings.voice) return;
+      try{
+        if(!("speechSynthesis" in window)) return;
+        window.speechSynthesis.cancel();
+        var u = new SpeechSynthesisUtterance(currentCall);
+        u.rate = 0.95; u.pitch = 1;
+        window.speechSynthesis.speak(u);
+      }catch(e){}
+    }
+    function stopSpeech(){ try{ if("speechSynthesis" in window) window.speechSynthesis.cancel(); }catch(e){} }
+
+    /* ================= GAME STATE ================= */
+    var G = null;
+    function newGame(practice){
+      var deck;
+      if(practice){
+        deck = [PRACTICE_VERSE];
+      } else {
+        var pool = VERSES.filter(function(v){ return settings.diff === "mixed" || v.d === settings.diff; });
+        deck = shuffle(pool.slice()).slice(0, settings.rounds);
+      }
+      return {
+        practice: !!practice,
+        deck: deck,
+        idx: 0,
+        score: 0,
+        streak: 0,
+        bestStreak: 0,
+        cleanRounds: 0,
+        results: [],
+        // per-round
+        verse: null, limit: 0, remaining: 0, elapsed: 0,
+        timerId: null, paused: false, over: false,
+        hintUsed: false, wrongTaps: 0, totalTaps: 0,
+        stage: "book", pickedBook: null, pickedChapter: null,
+        lockedPoints: 0, findPoints: 0, proofTimerId: null, proofLeft: 0, proofDone: false,
+        proofMethod: null, proofDetail: "", photoUrl: null, readListening: false, transcript: ""
+      };
+    }
+    function roundLimit(v){
+      if(G.practice) return TIME_LIMITS.practice;
+      if(settings.diff === "mixed") return TIME_LIMITS[v.d];
+      return TIME_LIMITS[settings.diff];
+    }
+    function stopTimers(){
+      if(!G) return;
+      if(G.timerId){ clearInterval(G.timerId); G.timerId = null; }
+      if(G.proofTimerId){ clearInterval(G.proofTimerId); G.proofTimerId = null; }
+      stopRecognition();
+    }
+
+    /* ================= SCREENS ================= */
+    function show(id){
+      var screens = document.querySelectorAll(".screen");
+      for(var i=0;i<screens.length;i++) screens[i].classList.remove("active");
+      $(id).classList.add("active");
+      window.scrollTo(0,0);
+    }
+    function modeLabel(){ return settings.mode === "real" ? "Practice · Real Bible" : "Verified · In-App"; }
+
+    /* ================= SETUP UI ================= */
+    function refreshSetup(){
+      var cards = document.querySelectorAll("#modeGrid .mode-card");
+      cards.forEach(function(c){ c.classList.toggle("selected", c.getAttribute("data-mode") === settings.mode); });
+      document.querySelectorAll("#diffRow .chip").forEach(function(c){ c.classList.toggle("selected", c.getAttribute("data-diff") === settings.diff); });
+      document.querySelectorAll("#roundRow .chip").forEach(function(c){ c.classList.toggle("selected", parseInt(c.getAttribute("data-rounds"),10) === settings.rounds); });
+      document.querySelectorAll("#versionRow .chip").forEach(function(c){ c.classList.toggle("selected", c.getAttribute("data-version") === settings.version); });
+      $("voiceToggle").setAttribute("aria-checked", settings.voice ? "true" : "false");
+      $("bestVerified").textContent = best.verified > 0 ? best.verified : "—";
+      $("bestPractice").textContent = best.practice > 0 ? best.practice : "—";
+    }
+    document.querySelectorAll("#modeGrid .mode-card").forEach(function(c){
+      c.addEventListener("click", function(){ settings.mode = c.getAttribute("data-mode"); persist(); refreshSetup(); });
+    });
+    document.querySelectorAll("#diffRow .chip").forEach(function(c){
+      c.addEventListener("click", function(){ settings.diff = c.getAttribute("data-diff"); persist(); refreshSetup(); });
+    });
+    document.querySelectorAll("#roundRow .chip").forEach(function(c){
+      c.addEventListener("click", function(){ settings.rounds = parseInt(c.getAttribute("data-rounds"),10); persist(); refreshSetup(); });
+    });
+    document.querySelectorAll("#versionRow .chip").forEach(function(c){
+      c.addEventListener("click", function(){ settings.version = c.getAttribute("data-version"); persist(); refreshSetup(); });
+    });
+    $("voiceToggle").addEventListener("click", function(){
+      settings.voice = !settings.voice; persist(); refreshSetup();
+      if(settings.voice){ currentCall = "Sword in hand! Find John chapter 4, verse 5."; speakCall(); }
+      else stopSpeech();
+    });
+    $("startBtn").addEventListener("click", function(){ startGame(false); });
+    $("practiceBtn").addEventListener("click", function(){ startGame(true); });
+
+    /* ================= FLOW ================= */
+    var readyTimers = [];
+    function clearReadyTimers(){ readyTimers.forEach(function(t){ clearTimeout(t); }); readyTimers = []; }
+
+    function startGame(practice){
+      stopSpeech(); stopTimers(); clearReadyTimers();
+      G = newGame(practice);
+      startRound();
+    }
+
+    function startRound(){
+      stopTimers(); stopSpeech();
+      G.verse = G.deck[G.idx];
+      G.limit = roundLimit(G.verse);
+      G.remaining = G.limit; G.elapsed = 0;
+      G.paused = false; G.over = false;
+      G.hintUsed = false; G.wrongTaps = 0; G.totalTaps = 0;
+      G.stage = "book"; G.pickedBook = null; G.pickedChapter = null;
+      G.lockedPoints = 0; G.findPoints = 0; G.proofDone = false;
+      G.proofMethod = null; G.proofDetail = ""; G.transcript = ""; G.readListening = false;
+      if(G.photoUrl){ try{ URL.revokeObjectURL(G.photoUrl); }catch(e){} G.photoUrl = null; }
+
+      var total = G.practice ? 1 : settings.rounds;
+      $("readyRoundPill").textContent = G.practice ? "Practice Round" : ("Round " + (G.idx+1) + " of " + total);
+      $("readyModePill").textContent = G.practice ? "Practice · John 4:5" : modeLabel();
+      $("readySub").innerHTML = settings.mode === "real"
+        ? "Bibles closed. Swords down.<br />Nobody moves until the call…"
+        : "Swords down. Eyes on the call.<br />Nobody taps until the call…";
+      show("scr-ready");
+
+      var cn = $("countNum");
+      var steps = ["3","2","1","GO!"];
+      cn.textContent = steps[0];
+      cn.classList.remove("pop"); void cn.offsetWidth; cn.classList.add("pop");
+      steps.forEach(function(s, i){
+        if(i === 0) return;
+        readyTimers.push(setTimeout(function(){
+          cn.textContent = s;
+          cn.classList.remove("pop"); void cn.offsetWidth; cn.classList.add("pop");
+        }, i * 700));
+      });
+      readyTimers.push(setTimeout(beginSearch, steps.length * 700));
+    }
+
+    function beginSearch(){
+      var v = G.verse;
+      currentCall = "Sword in hand! Find " + spokenRef(v) + ".";
+      $("searchRoundPill").textContent = G.practice ? "Practice" : ("Round " + (G.idx+1) + " of " + settings.rounds);
+      $("searchScorePill").textContent = "Score " + G.score;
+      $("callRef").textContent = refOf(v);
+      $("callDiff").textContent = G.practice ? "Practice Verse" : (DIFF_LABEL[v.d] + " · " + G.limit + " sec");
+      $("hearBtn").style.display = settings.voice ? "" : "none";
+
+      // zones per mode
+      $("realZone").style.display = settings.mode === "real" ? "" : "none";
+      $("appZone").style.display = settings.mode === "app" ? "" : "none";
+
+      // hint availability by the VERSE difficulty
+      var hz = $("hintZone"), ht = $("hintText");
+      ht.classList.remove("show"); ht.textContent = "";
+      if(v.d === "expert"){ hz.style.display = "none"; }
+      else {
+        hz.style.display = "";
+        $("hintBtn").style.display = "";
+        $("hintBtn").textContent = v.d === "hard" ? "Show a hint (−15 pts)" : "Show a hint (−15 pts)";
+      }
+
+      if(settings.mode === "app") buildStage();
+      updateTimerUI();
+      show("scr-search");
+      speakCall();
+
+      G.timerId = setInterval(function(){
+        if(G.paused || G.over) return;
+        G.remaining = Math.max(0, G.remaining - 0.1);
+        G.elapsed = G.limit - G.remaining;
+        updateTimerUI();
+        if(G.remaining <= 0){ onTimeout(); }
+      }, 100);
+    }
+
+    function updateTimerUI(){
+      var n = Math.ceil(G.remaining);
+      $("timerNum").textContent = n;
+      $("timerNum").parentElement.classList.toggle("low", G.remaining <= 10);
+      var fill = $("timerFill");
+      fill.style.width = (G.limit ? (G.remaining / G.limit) * 100 : 0) + "%";
+      fill.classList.toggle("low", G.remaining <= 10);
+    }
+
+    $("hearBtn").addEventListener("click", function(){ speakCall(); });
+
+    $("hintBtn").addEventListener("click", function(){
+      if(G.hintUsed) return;
+      G.hintUsed = true;
+      var v = G.verse, info = BOOKMAP[v.b];
+      var test = info.testament === "OT" ? "Old Testament" : "New Testament";
+      var txt = (v.d === "hard") ? ("Hint: it's in the " + test + ".")
+                                : ("Hint: " + test + " · " + info.family + " — look for " + v.b + ".");
+      var ht = $("hintText");
+      ht.textContent = txt + " (−15 pts)";
+      ht.classList.add("show");
+      $("hintBtn").style.display = "none";
+    });
+
+    /* ---- pause / quit ---- */
+    $("pauseBtn").addEventListener("click", function(){
+      if(!G || G.over) return;
+      G.paused = true; stopSpeech();
+      $("pauseOverlay").classList.add("show");
+    });
+    $("resumeBtn").addEventListener("click", function(){
+      G.paused = false;
+      $("pauseOverlay").classList.remove("show");
+    });
+    function quitToSetup(){
+      stopTimers(); stopSpeech(); clearReadyTimers();
+      if(G && G.photoUrl){ try{ URL.revokeObjectURL(G.photoUrl); }catch(e){} G.photoUrl = null; }
+      if(G) G.paused = false;
+      $("pauseOverlay").classList.remove("show");
+      G = null;
+      refreshSetup();
+      show("scr-setup");
+    }
+    $("quitBtn").addEventListener("click", quitToSetup);
+    $("readyQuit").addEventListener("click", quitToSetup);
+
+    /* ================= SCORING ================= */
+    function speedPoints(){
+      // 20 base + up to 80 scaled by time remaining; hint costs 15
+      var frac = G.limit ? (G.remaining / G.limit) : 0;
+      var pts = 20 + Math.round(80 * frac);
+      if(G.hintUsed) pts -= 15;
+      return Math.max(10, pts);
+    }
+    function streakBonus(){ return G.streak >= 2 ? Math.min(25, (G.streak - 1) * 5) : 0; }
+
+    function finishRound(proven, reason, lines){
+      // proven: bool; reason: 'found' | 'proof-fail' | 'proof-timeout' | 'timeout'
+      G.over = true; stopTimers(); stopSpeech();
+      var v = G.verse;
+      var totalPts = 0, bonus = 0;
+      if(proven){
+        G.streak += 1; G.bestStreak = Math.max(G.bestStreak, G.streak);
+        bonus = streakBonus();
+        totalPts = G.findPoints + bonus;
+        G.score += totalPts;
+        if(G.wrongTaps === 0) G.cleanRounds += 1;
+      } else {
+        G.streak = 0;
+      }
+      G.results.push({
+        verse: v, proven: proven, reason: reason,
+        timeUsed: proven || reason !== "timeout" ? G.elapsed : G.limit,
+        points: totalPts, wrongTaps: G.wrongTaps, hintUsed: G.hintUsed,
+        method: settings.mode === "real" ? (G.proofMethod || null) : null,
+        detail: G.proofDetail || ""
+      });
+
+      // Reveal screen
+      var total = G.practice ? 1 : settings.rounds;
+      $("revealRoundPill").textContent = G.practice ? "Practice Round" : ("Round " + (G.idx+1) + " of " + total);
+      $("revealScorePill").textContent = "Score " + G.score;
+      var vt = $("verdictText"), vs = $("verdictSub");
+      if(proven){
+        vt.textContent = settings.mode === "real" ? "Found & Proven!" : "Found It!";
+        vt.className = "verdict good";
+        vs.textContent = "Found in " + fmtTime(G.elapsed) + (G.proofDetail ? " · " + G.proofDetail : "") + (G.streak > 1 ? " · streak of " + G.streak + " 🔥" : "");
+      } else if(reason === "timeout"){
+        vt.textContent = "Time's Up!";
+        vt.className = "verdict bad";
+        vs.textContent = "No points this round — but read the verse and learn it for next time.";
+      } else if(reason === "proof-timeout"){
+        vt.textContent = "Proof Timed Out";
+        vt.className = "verdict bad";
+        vs.textContent = "The proof check ran out — no points this round. Here's the verse:";
+      } else {
+        vt.textContent = "Not Proven";
+        vt.className = "verdict bad";
+        vs.textContent = (G.proofDetail ? G.proofDetail + " " : "") + "That wasn't the right proof — no points this round. Here's the verse to learn:";
+      }
+      $("revealVerseText").textContent = "\u201C" + v.t + "\u201D";
+      $("revealVerseRef").textContent = "— " + refOf(v) + " (KJV)";
+      if(!isKJV()){
+        $("revealVersionHead").style.display = "";
+        $("revealVersionHead").textContent = "KJV reference text — your " + (settings.version === "Other" ? "version" : settings.version) + " Bible words it differently";
+        var kl = $("revealKeyList"); kl.innerHTML = "";
+        keyDataFor(v).k.forEach(function(g){
+          var li = document.createElement("li"); li.textContent = g[0]; kl.appendChild(li);
+        });
+        $("revealKeyPoints").style.display = "";
+      } else {
+        $("revealVersionHead").style.display = "none";
+        $("revealKeyPoints").style.display = "none";
+      }
+
+      var html = "";
+      lines.forEach(function(l){
+        html += '<div class="sl' + (l.neg ? " neg" : "") + '"><span>' + esc(l.label) + '</span><b>' + (l.neg ? "−" : "+") + Math.abs(l.pts) + '</b></div>';
+      });
+      if(proven && bonus > 0) html += '<div class="sl"><span>Streak bonus (x' + G.streak + ')</span><b>+' + bonus + '</b></div>';
+      if(!proven) html += '<div class="sl neg"><span>Round points</span><b>0</b></div>';
+      html += '<div class="sl total"><span>Round total</span><b>' + totalPts + ' pts</b></div>';
+      $("scoreLines").innerHTML = html;
+
+      $("nextBtn").textContent = G.practice ? "Back to Setup" : (G.idx + 1 >= total ? "See Results" : "Next Round");
+      show("scr-reveal");
+    }
+
+    $("nextBtn").addEventListener("click", function(){
+      if(!G) return;
+      if(G.practice){ quitToSetup(); return; }
+      if(G.idx + 1 >= G.deck.length){ showResults(); }
+      else { G.idx += 1; startRound(); }
+    });
+
+    function onTimeout(){
+      if(G.over) return;
+      if(settings.mode === "real" && G.proofDone) return;
+      finishRound(false, "timeout", [{label:"Timed out", pts:0}]);
+    }
+
+    /* ================= REAL BIBLE MODE: FOUND IT -> PROOF ================= */
+    $("foundBtn").addEventListener("click", function(){
+      if(!G || G.over || G.paused) return;
+      if(G.timerId){ clearInterval(G.timerId); G.timerId = null; }
+      G.findPoints = speedPoints();
+      G.lockedPoints = G.findPoints; // locked pending proof (streak bonus added if passed)
+      startProof();
+    });
+
+    function distractorVerses(v, n){
+      var sameBook = VERSES.filter(function(x){ return x !== v && x.b === v.b; });
+      var sameDiff = VERSES.filter(function(x){ return x !== v && x.b !== v.b && x.d === v.d; });
+      var rest = VERSES.filter(function(x){ return x !== v && x.b !== v.b && x.d !== v.d; });
+      var pool = shuffle(sameBook).concat(shuffle(sameDiff), shuffle(rest));
+      return pool.slice(0, n);
+    }
+    function openingWords(text, n){
+      var words = text.split(/\s+/);
+      var take = Math.min(n, words.length);
+      var s = words.slice(0, take).join(" ");
+      return take < words.length ? s + "…" : s;
+    }
+    function pickKeyWord(v){
+      var words = v.t.replace(/[\u201C\u201D".,;:!?()]/g, "").split(/\s+/);
+      var cands = [];
+      words.forEach(function(w, i){ if(w.length >= 5 && i > 0) cands.push(w); });
+      if(!cands.length) cands = words.filter(function(w){ return w.length >= 4; });
+      return cands[Math.floor(Math.random() * cands.length)];
+    }
+    function wordOptions(v, keyWord){
+      var pool = {};
+      pool[keyWord.toLowerCase()] = keyWord;
+      var others = shuffle(VERSES.filter(function(x){ return x !== v; }));
+      for(var i=0; i<others.length && Object.keys(pool).length < 4; i++){
+        var words = others[i].t.replace(/[\u201C\u201D".,;:!?()]/g, "").split(/\s+/);
+        words = shuffle(words.slice());
+        for(var j=0; j<words.length; j++){
+          var w = words[j];
+          if(w.length >= 4 && Math.abs(w.length - keyWord.length) <= 3 && !pool[w.toLowerCase()]){
+            pool[w.toLowerCase()] = w; break;
+          }
+        }
+      }
+      return shuffle(Object.keys(pool).map(function(k){ return pool[k]; }));
+    }
+
+    function startQuiz(){
+      var v = G.verse;
+      G.proofDone = false;
+      $("proofRef").textContent = refOf(v);
+      $("proofLockedPill").textContent = "Locked: " + G.lockedPoints + " pts";
+      var body = $("proofBody");
+      body.innerHTML = "";
+      var type = G.idx % 3; // rotate: 0 full text, 1 fill blank, 2 opening words
+      var distractors = distractorVerses(v, 2);
+
+      if(type === 0){
+        var q = document.createElement("p"); q.className = "proof-q";
+        q.textContent = "Which of these is the exact verse at " + refOf(v) + "?";
+        body.appendChild(q);
+        var opts = shuffle([{v:v, ok:true}].concat(distractors.map(function(d){ return {v:d, ok:false}; })));
+        opts.forEach(function(o){
+          var b = document.createElement("button");
+          b.type = "button"; b.className = "choice"; b.textContent = o.v.t;
+          b.addEventListener("click", function(){ answerProof(o.ok, b); });
+          body.appendChild(b);
+        });
+      } else if(type === 1){
+        var key = pickKeyWord(v);
+        var q2 = document.createElement("p"); q2.className = "proof-q";
+        q2.textContent = "Fill in the missing word from " + refOf(v) + ":";
+        body.appendChild(q2);
+        var bv = document.createElement("div"); bv.className = "blank-verse";
+        var parts = v.t.split(new RegExp("\\b" + key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\b"));
+        bv.innerHTML = esc(parts[0] || "") + '<span class="blank-slot">?</span>' + esc(parts.slice(1).join(key) || "");
+        body.appendChild(bv);
+        var grid = document.createElement("div"); grid.className = "btn-row two mt";
+        wordOptions(v, key).forEach(function(w){
+          var b = document.createElement("button");
+          b.type = "button"; b.className = "choice word"; b.style.marginTop = "0";
+          b.textContent = w;
+          b.addEventListener("click", function(){ answerProof(w === key, b); });
+          grid.appendChild(b);
+        });
+        body.appendChild(grid);
+      } else {
+        var q3 = document.createElement("p"); q3.className = "proof-q";
+        q3.textContent = "How does " + refOf(v) + " begin?";
+        body.appendChild(q3);
+        var opts2 = shuffle([{v:v, ok:true}].concat(distractors.map(function(d){ return {v:d, ok:false}; })));
+        opts2.forEach(function(o){
+          var b = document.createElement("button");
+          b.type = "button"; b.className = "choice"; b.textContent = "\u201C" + openingWords(o.v.t, 6) + "\u201D";
+          b.addEventListener("click", function(){ answerProof(o.ok, b); });
+          body.appendChild(b);
+        });
+      }
+
+      show("scr-proof");
+      G.proofLeft = PROOF_SECONDS;
+      $("proofTimer").textContent = G.proofLeft;
+      $("proofTimer").classList.remove("low");
+      G.proofTimerId = setInterval(function(){
+        G.proofLeft -= 1;
+        $("proofTimer").textContent = Math.max(0, G.proofLeft);
+        $("proofTimer").classList.toggle("low", G.proofLeft <= 5);
+        if(G.proofLeft <= 0){
+          clearInterval(G.proofTimerId); G.proofTimerId = null;
+          if(!G.proofDone){ G.proofDone = true; finishRound(false, "proof-timeout", [{label:"Proof timed out — locked points lost", pts:0}]); }
+        }
+      }, 1000);
+    }
+
+    function answerProof(ok, btn){
+      if(!G || G.proofDone || G.over) return;
+      G.proofDone = true;
+      if(G.proofTimerId){ clearInterval(G.proofTimerId); G.proofTimerId = null; }
+      var choices = $("proofBody").querySelectorAll(".choice");
+      choices.forEach(function(c){ c.disabled = true; });
+      if(btn) btn.classList.add(ok ? "picked-right" : "picked-wrong");
+      var lines = [{label:"Find points (locked at FOUND IT)", pts:G.findPoints}];
+      setTimeout(function(){
+        if(ok) finishRound(true, "found", lines);
+        else finishRound(false, "proof-fail", [{label:"Proof check missed — locked points lost", pts:0}]);
+      }, 650);
+    }
+
+    /* ================= PROOF CHOOSER + METHODS ================= */
+    function startProof(){
+      var v = G.verse;
+      G.proofDone = false; G.proofMethod = null; G.proofDetail = "";
+      $("proofRef").textContent = refOf(v);
+      $("proofLockedPill").textContent = "Locked: " + G.lockedPoints + " pts";
+      stopProofClock();
+      var body = $("proofBody");
+      body.innerHTML = "";
+      var intro = document.createElement("p"); intro.className = "proof-q";
+      intro.textContent = "How will you prove you found " + refOf(v) + "?";
+      body.appendChild(intro);
+      var readDesc = isKJV()
+        ? "Read the verse out loud from your Bible. The app listens and checks your words against the exact KJV text. Automatic — the strongest check."
+        : "Read the verse out loud from your Bible. The app listens and checks for the verse's key words, so your " + settings.version + " wording counts. Automatic — the strongest check.";
+      var quizDesc = isKJV()
+        ? "One quick question about the exact KJV words — pick the verse, fill the blank, or spot its opening words. 15 seconds."
+        : "One quick question about what the verse says — who, what, where — the same in every version. 15 seconds.";
+      addMethodBtn(body, "🎤 Read It Aloud", readDesc, function(){ chooseProof("read"); });
+      addMethodBtn(body, "📷 Photo Check", "Snap a photo of the open page. A leader or another player looks at it and taps Yes. The app itself does not read the photo.", function(){ chooseProof("photo"); });
+      addMethodBtn(body, "❓ Quiz Proof", quizDesc, function(){ chooseProof("quiz"); });
+      show("scr-proof");
+    }
+    function addMethodBtn(body, title, desc, fn){
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "method-btn";
+      var t = document.createElement("span"); t.className = "mb-title"; t.textContent = title;
+      var p = document.createElement("p"); p.textContent = desc;
+      b.appendChild(t); b.appendChild(p);
+      b.addEventListener("click", fn);
+      body.appendChild(b);
+    }
+    function addSwitchLink(body){
+      var wrap = document.createElement("div"); wrap.style.textAlign = "center";
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "switch-link"; b.textContent = "← Choose a different proof";
+      b.addEventListener("click", function(){ if(G && !G.proofDone && !G.over){ stopProofActivity(); startProof(); } });
+      wrap.appendChild(b); body.appendChild(wrap);
+    }
+    function stopProofClock(){
+      if(G && G.proofTimerId){ clearInterval(G.proofTimerId); G.proofTimerId = null; }
+      var pt = $("proofTimer");
+      if(pt){ pt.textContent = ""; pt.classList.remove("low"); }
+    }
+    function startProofClock(seconds, onExpire){
+      stopProofClock();
+      G.proofLeft = seconds;
+      $("proofTimer").textContent = G.proofLeft;
+      G.proofTimerId = setInterval(function(){
+        G.proofLeft -= 1;
+        $("proofTimer").textContent = Math.max(0, G.proofLeft);
+        $("proofTimer").classList.toggle("low", G.proofLeft <= 5);
+        if(G.proofLeft <= 0){ stopProofClock(); onExpire(); }
+      }, 1000);
+    }
+    function stopProofActivity(){ stopProofClock(); stopRecognition(); }
+    function chooseProof(method){
+      if(!G || G.over) return;
+      G.proofMethod = method;
+      if(method === "quiz"){
+        if(!isKJV() && keyDataFor(G.verse).cq){ startContentQuiz(); addSwitchLink($("proofBody")); }
+        else { startQuiz(); addSwitchLink($("proofBody")); }
+      }
+      else if(method === "read") startRead();
+      else if(method === "photo") startPhoto();
+    }
+
+    /* ---- Quiz Proof, non-KJV: content question (same answer in every version) ---- */
+    function startContentQuiz(){
+      var v = G.verse;
+      var kd = keyDataFor(v);
+      var body = $("proofBody");
+      body.innerHTML = "";
+      var q = document.createElement("p"); q.className = "proof-q";
+      q.textContent = kd.cq[0];
+      body.appendChild(q);
+      var note = document.createElement("p");
+      note.style.cssText = "color:var(--ink-soft); font-weight:700; margin:0 0 4px;";
+      note.textContent = "Answer from the verse in your " + (settings.version === "Other" ? "own" : settings.version) + " Bible — the answer is the same in every version.";
+      body.appendChild(note);
+      var opts = shuffle([{t:kd.cq[1], ok:true}].concat(kd.cq[2].map(function(w){ return {t:w, ok:false}; })));
+      opts.forEach(function(o){
+        var b = document.createElement("button");
+        b.type = "button"; b.className = "choice"; b.textContent = o.t;
+        b.addEventListener("click", function(){ answerProof(o.ok, b); });
+        body.appendChild(b);
+      });
+      startProofClock(PROOF_SECONDS, function(){
+        if(G && !G.proofDone){ G.proofDone = true; finishRound(false, "proof-timeout", [{label:"Proof timed out — locked points lost", pts:0}]); }
+      });
+    }
+
+    /* ---- Read It Aloud ---- */
+    var recognition = null;
+    function stopRecognition(){
+      if(G) G.readListening = false;
+      if(recognition){
+        try{ recognition.onresult = null; recognition.onend = null; recognition.onerror = null; recognition.stop(); }catch(e){}
+        recognition = null;
+      }
+    }
+    function startRead(){
+      var v = G.verse;
+      var body = $("proofBody");
+      body.innerHTML = "";
+      stopProofClock();
+      var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      var q = document.createElement("p"); q.className = "proof-q";
+      q.textContent = "Read " + refOf(v) + " out loud from your own Bible — the whole verse.";
+      body.appendChild(q);
+      var note = document.createElement("p");
+      note.style.cssText = "color:var(--ink-soft); font-weight:700; margin:0 0 6px;";
+      note.textContent = isKJV()
+        ? "The app checks your words against the exact KJV text."
+        : "Your version words it differently from KJV, so the app checks for the verse's key words instead.";
+      body.appendChild(note);
+      if(!SR){
+        var fb = document.createElement("div"); fb.className = "fallback-note";
+        fb.textContent = "This browser can't listen — speech recognition isn't available here. Use Photo Check or Quiz Proof instead; there's no penalty for switching.";
+        body.appendChild(fb);
+        addSwitchLink(body);
+        return;
+      }
+      var status = document.createElement("p"); status.className = "listen-status"; status.id = "readStatus";
+      status.textContent = "Ready when you are.";
+      body.appendChild(status);
+      var heard = document.createElement("div"); heard.className = "heard-box"; heard.id = "heardBox";
+      heard.innerHTML = '<span class="dim2">What the app hears will appear here…</span>';
+      body.appendChild(heard);
+      var micBtn = document.createElement("button");
+      micBtn.type = "button"; micBtn.className = "btn btn-gold mt"; micBtn.id = "micBtn";
+      micBtn.textContent = "🎤 Tap and read the verse out loud";
+      body.appendChild(micBtn);
+      var doneBtn = document.createElement("button");
+      doneBtn.type = "button"; doneBtn.className = "btn btn-brown mt"; doneBtn.id = "readDoneBtn";
+      doneBtn.textContent = "I'm Done Reading";
+      doneBtn.style.display = "none";
+      body.appendChild(doneBtn);
+      addSwitchLink(body);
+      micBtn.addEventListener("click", function(){ beginListening(status, heard, micBtn, doneBtn); });
+      doneBtn.addEventListener("click", function(){ finishReading(); });
+    }
+    function beginListening(status, heard, micBtn, doneBtn){
+      if(!G || G.proofDone) return;
+      var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      G.transcript = "";
+      try{ recognition = new SR(); }
+      catch(e){ readFallback("This browser can't listen right now. Use Photo Check or Quiz Proof instead — no penalty for switching."); return; }
+      recognition.lang = "en-US";
+      recognition.interimResults = true;
+      recognition.continuous = true;
+      recognition.maxAlternatives = 1;
+      G.readListening = true;
+      recognition.onresult = function(ev){
+        var interim = "", finalT = "";
+        for(var i = 0; i < ev.results.length; i++){
+          if(ev.results[i].isFinal) finalT += ev.results[i][0].transcript + " ";
+          else interim += ev.results[i][0].transcript;
+        }
+        G.transcript = finalT;
+        var txt = (finalT + interim).trim();
+        heard.textContent = txt || "Listening…";
+      };
+      recognition.onerror = function(ev){
+        if(ev.error === "not-allowed" || ev.error === "service-not-allowed" || ev.error === "audio-capture"){
+          G.readListening = false;
+          readFallback("The microphone is blocked or unavailable, so the app can't hear you. Use Photo Check or Quiz Proof instead — no penalty for switching.");
+        }
+      };
+      recognition.onend = function(){
+        if(G && G.readListening && !G.proofDone){ try{ recognition.start(); }catch(e){} }
+      };
+      try{ recognition.start(); }
+      catch(e){ readFallback("The microphone couldn't start. Use Photo Check or Quiz Proof instead — no penalty for switching."); return; }
+      status.textContent = "🔴 Listening… read the whole verse, then tap Done.";
+      status.classList.add("live");
+      micBtn.style.display = "none";
+      doneBtn.style.display = "";
+      startProofClock(READ_SECONDS, function(){ finishReading(); });
+    }
+    function readFallback(msg){
+      stopProofActivity();
+      G.proofMethod = null;
+      var body = $("proofBody");
+      body.innerHTML = "";
+      var fb = document.createElement("div"); fb.className = "fallback-note"; fb.textContent = msg;
+      body.appendChild(fb);
+      var row = document.createElement("div"); row.className = "btn-row two mt";
+      var b1 = document.createElement("button"); b1.type = "button"; b1.className = "btn btn-gold"; b1.style.fontSize = "1rem"; b1.textContent = "📷 Photo Check";
+      b1.addEventListener("click", function(){ chooseProof("photo"); });
+      var b2 = document.createElement("button"); b2.type = "button"; b2.className = "btn btn-brown"; b2.style.fontSize = "1rem"; b2.textContent = "❓ Quiz Proof";
+      b2.addEventListener("click", function(){ chooseProof("quiz"); });
+      row.appendChild(b1); row.appendChild(b2);
+      body.appendChild(row);
+    }
+    function finishReading(){
+      if(!G || G.proofDone || G.over) return;
+      G.proofDone = true;
+      stopProofClock();
+      var heardText = (G.transcript || "").trim();
+      stopRecognition();
+      var v = G.verse;
+      var status = $("readStatus");
+      if(isKJV()){
+        var verseWords = normTokens(v.t);
+        var heardWords = normTokens(heardText);
+        var matched = lcsLen(verseWords, heardWords);
+        var need = Math.ceil(verseWords.length * 0.75);
+        var ok = verseWords.length > 0 && matched >= need;
+        G.proofDetail = "Heard " + matched + " of " + verseWords.length + " words of the KJV text.";
+        if(status){
+          status.textContent = ok ? ("✓ " + G.proofDetail + " — Proven!") : ("Heard " + matched + " of " + verseWords.length + " words — not enough to prove it.");
+          status.classList.remove("live");
+        }
+        var lines = ok ? [{label:"Find points (locked at FOUND IT)", pts:G.findPoints}]
+                       : [{label:"Read-aloud check missed — locked points lost", pts:0}];
+        setTimeout(function(){ if(G) finishRound(ok, ok ? "found" : "proof-fail", lines); }, 1100);
+      } else {
+        var groups = keyDataFor(v).k;
+        var heardN = normString(heardText);
+        var got = [], missed = [];
+        groups.forEach(function(g){
+          var hit = g[1].some(function(syn){ return (" " + heardN + " ").indexOf(" " + syn + " ") >= 0; });
+          (hit ? got : missed).push(g[0]);
+        });
+        var needG = Math.ceil(groups.length * 0.7);
+        if(groups.length <= 4 && needG === groups.length && groups.length > 1) needG = groups.length - 1;
+        var ok2 = got.length > 0 && got.length >= needG;
+        G.proofDetail = "Key words heard: " + (got.length ? got.join(", ") : "none") + " (" + settings.version + ").";
+        if(status){
+          status.textContent = ok2
+            ? ("✓ Heard the key words: " + got.join(", ") + " — Proven (" + settings.version + ")")
+            : ("Heard the key words: " + (got.length ? got.join(", ") : "none") + (missed.length ? " — missed: " + missed.join(", ") : "") + ". Not proven.");
+          status.classList.remove("live");
+        }
+        var lines2 = ok2 ? [{label:"Find points (locked at FOUND IT)", pts:G.findPoints}]
+                         : [{label:"Read-aloud check missed — locked points lost", pts:0}];
+        setTimeout(function(){ if(G) finishRound(ok2, ok2 ? "found" : "proof-fail", lines2); }, 1100);
+      }
+    }
+
+    /* ---- Photo Check (leader-checked; the app does not read the photo) ---- */
+    function startPhoto(){
+      var v = G.verse;
+      var body = $("proofBody");
+      body.innerHTML = "";
+      stopProofClock();
+      var q = document.createElement("p"); q.className = "proof-q";
+      q.textContent = "Photograph the open page where you found " + refOf(v) + ".";
+      body.appendChild(q);
+      var note = document.createElement("p");
+      note.style.cssText = "color:var(--ink-soft); font-weight:700; margin:0 0 6px; line-height:1.45;";
+      note.textContent = "A leader or another player checks the photo — the app does not read it. The photo stays on this device; it is never uploaded or saved.";
+      body.appendChild(note);
+      var input = document.createElement("input");
+      input.type = "file"; input.accept = "image/*"; input.setAttribute("capture", "environment");
+      input.style.display = "none"; input.id = "photoInput";
+      body.appendChild(input);
+      var btn = document.createElement("button");
+      btn.type = "button"; btn.className = "btn btn-gold"; btn.textContent = "📷 Take / Choose Photo";
+      body.appendChild(btn);
+      var zone = document.createElement("div"); zone.id = "photoZone";
+      body.appendChild(zone);
+      addSwitchLink(body);
+      btn.addEventListener("click", function(){ input.click(); });
+      input.addEventListener("change", function(){
+        if(input.files && input.files[0]){
+          if(G.photoUrl){ try{ URL.revokeObjectURL(G.photoUrl); }catch(e){} }
+          G.photoUrl = URL.createObjectURL(input.files[0]);
+          renderPhotoCheck(zone, btn);
+        }
+      });
+    }
+    function renderPhotoCheck(zone, takeBtn){
+      var v = G.verse;
+      zone.innerHTML = "";
+      takeBtn.style.display = "none";
+      var img = document.createElement("img");
+      img.className = "photo-img mt"; img.src = G.photoUrl; img.alt = "Photo of the open Bible page";
+      zone.appendChild(img);
+      var box = document.createElement("div"); box.className = "compare-box";
+      var head = document.createElement("p"); head.className = "cb-head";
+      head.textContent = isKJV()
+        ? ("Check the photo against " + refOf(v) + " (KJV):")
+        : ("KJV reference text for " + refOf(v) + " — their version words it differently:");
+      box.appendChild(head);
+      var vt = document.createElement("p");
+      vt.style.cssText = "font-family:Georgia,serif; font-size:1.05rem; line-height:1.55; margin:0;";
+      vt.textContent = "\u201C" + v.t + "\u201D";
+      box.appendChild(vt);
+      if(!isKJV()){
+        var kh = document.createElement("p"); kh.className = "cb-head"; kh.style.marginTop = "10px";
+        kh.textContent = "Check for these key points on their page:";
+        box.appendChild(kh);
+        var ul = document.createElement("ul"); ul.className = "key-points";
+        keyDataFor(v).k.forEach(function(g){
+          var li = document.createElement("li"); li.textContent = g[0]; ul.appendChild(li);
+        });
+        box.appendChild(ul);
+      }
+      zone.appendChild(box);
+      var row = document.createElement("div"); row.className = "btn-row two mt";
+      var yes = document.createElement("button"); yes.type = "button"; yes.className = "btn btn-gold"; yes.style.fontSize = "1.02rem";
+      yes.textContent = "✓ Yes — this is the verse";
+      yes.addEventListener("click", function(){
+        if(!G || G.proofDone || G.over) return;
+        G.proofDone = true; G.proofDetail = "A leader checked the photo of the page.";
+        finishRound(true, "found", [{label:"Find points (locked at FOUND IT)", pts:G.findPoints}]);
+      });
+      var no = document.createElement("button"); no.type = "button"; no.className = "btn btn-ghost"; no.style.cssText = "color:var(--ink); border-color:var(--leather); font-size:1.02rem;";
+      no.textContent = "Not yet";
+      no.addEventListener("click", function(){
+        if(!G || G.proofDone || G.over) return;
+        G.proofDone = true; G.proofDetail = "The photo check said not yet.";
+        finishRound(false, "proof-fail", [{label:"Photo check not confirmed — locked points lost", pts:0}]);
+      });
+      row.appendChild(yes); row.appendChild(no);
+      zone.appendChild(row);
+      var retake = document.createElement("div"); retake.style.textAlign = "center";
+      var rb = document.createElement("button"); rb.type = "button"; rb.className = "switch-link"; rb.textContent = "Retake photo";
+      rb.addEventListener("click", function(){
+        zone.innerHTML = ""; takeBtn.style.display = "";
+        var inp = $("photoInput"); if(inp) inp.click();
+      });
+      retake.appendChild(rb);
+      zone.appendChild(retake);
+    }
+
+    /* ================= IN-APP MODE: TAP GRIDS ================= */
+    function setSteps(){
+      $("stBook").className = "st " + (G.stage === "book" ? "now" : "done");
+      $("stChapter").className = "st " + (G.stage === "chapter" ? "now" : (G.stage === "verse" ? "done" : ""));
+      $("stVerse").className = "st " + (G.stage === "verse" ? "now" : "");
+    }
+    function crumb(){
+      var v = G.verse, el = $("crumb");
+      if(G.stage === "book") el.innerHTML = '<span class="dim">Start with the book…</span>';
+      else if(G.stage === "chapter") el.innerHTML = esc(G.pickedBook) + ' <span class="dim">— now the chapter</span>';
+      else el.innerHTML = esc(G.pickedBook) + " " + G.pickedChapter + ' <span class="dim">— now the verse</span>';
+    }
+    function buildStage(){
+      setSteps(); crumb();
+      $("tapFeedback").textContent = "";
+      var zone = $("gridZone"); zone.innerHTML = "";
+      var v = G.verse;
+      if(G.stage === "book"){
+        ["OT","NT"].forEach(function(test){
+          var h = document.createElement("p"); h.className = "grid-head";
+          h.textContent = test === "OT" ? "Old Testament" : "New Testament";
+          zone.appendChild(h);
+          var grid = document.createElement("div"); grid.className = "tap-grid";
+          BOOKS.filter(function(b){ return b[2] === test; }).forEach(function(b){
+            var cell = document.createElement("button");
+            cell.type = "button"; cell.className = "tap-cell"; cell.textContent = b[0];
+            cell.addEventListener("click", function(){ tapBook(b[0], cell); });
+            grid.appendChild(cell);
+          });
+          zone.appendChild(grid);
+        });
+      } else if(G.stage === "chapter"){
+        var n = BOOKMAP[G.pickedBook].chapters;
+        var h2 = document.createElement("p"); h2.className = "grid-head";
+        h2.textContent = "Chapters in " + G.pickedBook;
+        zone.appendChild(h2);
+        var grid2 = document.createElement("div"); grid2.className = "tap-grid nums";
+        for(var i=1; i<=n; i++){
+          (function(num){
+            var cell = document.createElement("button");
+            cell.type = "button"; cell.className = "tap-cell"; cell.textContent = num;
+            cell.addEventListener("click", function(){ tapChapter(num, cell); });
+            grid2.appendChild(cell);
+          })(i);
+        }
+        zone.appendChild(grid2);
+      } else {
+        var h3 = document.createElement("p"); h3.className = "grid-head";
+        h3.textContent = "Verses in " + G.pickedBook + " " + G.pickedChapter;
+        zone.appendChild(h3);
+        var grid3 = document.createElement("div"); grid3.className = "tap-grid nums";
+        for(var j=1; j<=v.vc; j++){
+          (function(num){
+            var cell = document.createElement("button");
+            cell.type = "button"; cell.className = "tap-cell"; cell.textContent = num;
+            cell.addEventListener("click", function(){ tapVerse(num, cell); });
+            grid3.appendChild(cell);
+          })(j);
+        }
+        zone.appendChild(grid3);
+      }
+    }
+    function wrongTap(cell, what){
+      G.wrongTaps += 1; G.totalTaps += 1;
+      cell.classList.add("wrong");
+      cell.disabled = true;
+      $("tapFeedback").textContent = "Not the " + what + " — keep searching! (−5 pts)";
+    }
+    function rightTap(cell, msg){
+      G.totalTaps += 1;
+      cell.classList.add("right");
+      $("tapFeedback").textContent = msg;
+    }
+    function tapBook(name, cell){
+      if(!G || G.over || G.paused || G.stage !== "book") return;
+      if(name === G.verse.b){
+        rightTap(cell, G.verse.b + " — that's the book!");
+        G.pickedBook = name;
+        setTimeout(function(){
+          if(!G || G.over) return;
+          if(isSingleChapter(name)){ G.pickedChapter = 1; G.stage = "verse"; }
+          else G.stage = "chapter";
+          buildStage();
+        }, 450);
+      } else wrongTap(cell, "book");
+    }
+    function tapChapter(num, cell){
+      if(!G || G.over || G.paused || G.stage !== "chapter") return;
+      if(num === G.verse.c){
+        rightTap(cell, "Chapter " + num + " — right chapter!");
+        G.pickedChapter = num;
+        setTimeout(function(){ if(!G || G.over) return; G.stage = "verse"; buildStage(); }, 450);
+      } else wrongTap(cell, "chapter");
+    }
+    function tapVerse(num, cell){
+      if(!G || G.over || G.paused || G.stage !== "verse") return;
+      if(num === G.verse.v){
+        rightTap(cell, "Verse " + num + " — FOUND IT!");
+        var pts = Math.max(10, speedPoints() - G.wrongTaps * 5);
+        G.findPoints = pts;
+        var lines = [{label:"Find points (speed)", pts:speedPoints()}];
+        if(G.hintUsed) lines = [{label:"Find points (speed, after hint)", pts:speedPoints()}];
+        if(G.wrongTaps > 0) lines.push({label:"Wrong taps × " + G.wrongTaps, pts:-G.wrongTaps * 5, neg:true});
+        setTimeout(function(){ if(G && !G.over) finishRound(true, "found", lines); }, 600);
+      } else wrongTap(cell, "verse");
+    }
+
+    /* ================= RESULTS ================= */
+    function showResults(){
+      stopTimers(); stopSpeech();
+      var total = G.deck.length;
+      var proven = G.results.filter(function(r){ return r.proven; });
+      var unproven = G.results.filter(function(r){ return !r.proven; });
+      var bestTime = proven.length ? Math.min.apply(null, proven.map(function(r){ return r.timeUsed; })) : null;
+      var accuracy = total ? Math.round((G.cleanRounds / total) * 100) : 0;
+
+      $("resultsModeLine").textContent = modeLabel() + " · " +
+        (settings.diff === "mixed" ? "Mixed" : DIFF_LABEL[settings.diff]) + " · " + total + " rounds" +
+        (settings.mode === "real" ? " · Bible: " + (settings.version === "Other" ? "Another version" : settings.version) : "");
+      $("resScore").textContent = G.score;
+      $("resBestTime").textContent = bestTime !== null ? fmtTime(bestTime) : "—";
+      $("resAccuracy").textContent = accuracy + "%";
+      $("resStreak").textContent = G.bestStreak;
+
+      function rowFor(r){
+        var li = document.createElement("li");
+        var ref = document.createElement("span"); ref.className = "rr"; ref.textContent = refOf(r.verse);
+        var time = document.createElement("span"); time.className = "rt";
+        time.textContent = r.reason === "timeout" ? "timed out" : (r.reason === "proof-timeout" ? "proof timed out" : "found in " + fmtTime(r.timeUsed));
+        if(r.proven && r.method && METHOD_LABEL[r.method]) time.textContent += " · Proven — " + METHOD_LABEL[r.method];
+        var pts = document.createElement("span"); pts.className = "rp";
+        pts.textContent = r.proven ? ("+" + r.points + " pts") : "0 pts";
+        li.appendChild(ref); li.appendChild(time); li.appendChild(pts);
+        return li;
+      }
+      var pl = $("provenList"); pl.innerHTML = "";
+      proven.forEach(function(r){ pl.appendChild(rowFor(r)); });
+      $("provenEmpty").style.display = proven.length ? "none" : "";
+      var ul = $("unprovenList"); ul.innerHTML = "";
+      unproven.forEach(function(r){ ul.appendChild(rowFor(r)); });
+      $("unprovenEmpty").style.display = unproven.length ? "none" : "";
+
+      $("honestNote").textContent = settings.mode === "real"
+        ? "Real Bible Mode proofs are listed beside each find — Read Aloud is checked by the app listening, Photo Check is confirmed by a leader looking at the photo, and Quiz Proof checks the verse itself. For scores the app verifies completely on its own, play In-App Find Mode (Verified)."
+        : "Verified Mode times are exact — the app saw every tap. Best scores from this mode are the ones that count as Verified records.";
+
+      // best score (skip practice rounds)
+      var key = settings.mode === "real" ? "practice" : "verified";
+      var isBest = false;
+      if(G.score > (best[key] || 0)){ best[key] = G.score; isBest = true; persist(); }
+      $("newBestLine").style.display = isBest ? "" : "none";
+
+      show("scr-results");
+    }
+    $("againBtn").addEventListener("click", function(){ startGame(false); });
+    $("settingsBtn").addEventListener("click", function(){ G = null; refreshSetup(); show("scr-setup"); });
+
+    /* ================= INIT ================= */
+    refreshSetup();
+    </script>
+  </body>
+</html>
