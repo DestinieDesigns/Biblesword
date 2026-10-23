@@ -290,6 +290,26 @@
       .live-chip{ font-weight:800; font-size:.9rem; padding:5px 10px; border-radius:999px; border:2px solid var(--leather); background:#fffdf4; color:var(--ink-soft); }
       .live-chip.hit{ background:var(--good-bg); border-color:var(--good); color:#234d1e; }
 
+      /* duel room */
+      .txt-input{ width:100%; font:inherit; font-size:1.08rem; font-weight:700; padding:13px 14px; border-radius:12px; border:2px solid var(--panel-line); background:rgba(0,0,0,.25); color:var(--cream); }
+      .txt-input::placeholder{ color:var(--cream-dim); font-weight:600; }
+      .code-input{ text-align:center; text-transform:uppercase; letter-spacing:.3em; font-size:1.5rem; font-family:"Cinzel",serif; }
+      .code-big{ font-family:"Cinzel",serif; font-weight:900; font-size:3.2rem; letter-spacing:.3em; text-indent:.3em; text-align:center; color:var(--gold-bright); margin:4px 0; }
+      .duel-error{ display:none; background:var(--bad-bg); border:2px solid var(--bad); color:var(--ink); border-radius:12px; padding:12px 14px; font-weight:700; line-height:1.45; margin-top:12px; }
+      .duel-error.show{ display:block; }
+      .player-row{ display:flex; align-items:center; gap:8px; padding:10px 2px; border-bottom:1px dashed var(--panel-line); font-weight:700; }
+      .player-row:last-child{ border-bottom:none; }
+      .player-row .p-name{ flex:1; }
+      .player-row .p-tag{ font-size:.7rem; font-weight:800; letter-spacing:.05em; text-transform:uppercase; background:var(--leather); color:#ffe9bd; padding:2px 8px; border-radius:999px; }
+      .player-row .p-ready{ color:#9ed69a; font-weight:800; font-size:.9rem; white-space:nowrap; }
+      .player-row .p-wait{ color:var(--cream-dim); font-weight:700; font-size:.9rem; white-space:nowrap; }
+      .player-row.off{ opacity:.5; }
+      .duel-banner{ text-align:center; font-family:"Cinzel",serif; font-weight:900; font-size:1.45rem; color:var(--gold-bright); margin:6px 0 4px; line-height:1.25; }
+      .stand-row{ display:flex; justify-content:space-between; align-items:baseline; gap:10px; padding:9px 2px; border-bottom:1px dashed rgba(122,74,33,.35); font-weight:700; }
+      .stand-row:last-child{ border-bottom:none; }
+      .stand-row.me{ color:var(--leather-dark); }
+      .stand-row .sr-pts{ font-family:"Cinzel",serif; font-weight:900; white-space:nowrap; }
+
       .small-note{ font-size:.88rem; color:var(--cream-dim); text-align:center; margin-top:10px; line-height:1.4; }
       .mt{ margin-top:14px; } .mt-lg{ margin-top:22px; }
       @media (prefers-reduced-motion: reduce){
@@ -326,6 +346,11 @@
               <p>No Bible handy? Race by tapping the right Book, Chapter, then Verse. Every tap is timed by the app, so these scores are fully verified.</p>
             </button>
           </div>
+
+          <button type="button" class="mode-card" id="duelEntryBtn" style="margin-top:10px;">
+            <span class="mc-title">⚔️ Duel Room <span class="mc-tag">Multiplayer</span></span>
+            <p>Play against others — up to 8 players in one room. One person hosts and shares a 4-letter code; everyone races the same verse at the same time, on their own phone.</p>
+          </button>
 
           <p class="section-label mt-lg">2 · Difficulty</p>
           <div class="chip-row" id="diffRow">
@@ -395,6 +420,7 @@
             <li><strong>In-App Find Mode (Verified):</strong> tap the correct <strong>Book</strong>, then <strong>Chapter</strong>, then <strong>Verse</strong>. Wrong taps cost 5 points each, so accuracy counts.</li>
             <li><strong>Scoring:</strong> the faster you find it, the more of the 100 points you keep. Streaks earn bonuses. Run out of time and the round scores 0 — but the verse is always revealed so you still learn it.</li>
             <li><strong>Hints:</strong> Easy and Medium can show the testament and book family; Hard shows the testament only; Expert gets nothing. Using a hint costs 15 points.</li>
+            <li><strong>Duel Room (multiplayer, up to 8 players):</strong> one player hosts a room and shares the 4-letter code; everyone else opens the game, taps Duel Room, and joins with it. The host picks the duel style and starts — the same verse is called on every phone at the same moment. First to find it buzzes in, then proves it (in an In-App Duel, finishing the Book › Chapter › Verse taps IS the buzz). A proven winner takes the round's points. Duel needs internet for the first connection — even in the same room — then the phones talk directly to each other. Works on GitHub Pages.</li>
           </ul>
           <p>All verses are King James Version (KJV), word for word.</p>
         </details>
@@ -544,6 +570,141 @@
         <div class="btn-row two mt">
           <button type="button" class="btn btn-gold" id="againBtn">Play Again</button>
           <button type="button" class="btn btn-ghost" id="settingsBtn">Change Settings</button>
+        </div>
+      </section>
+
+      <!-- ============ SCREEN: DUEL LOBBY ============ -->
+      <section class="screen" id="scr-duel">
+        <div class="title-wrap" style="padding-top:4px;">
+          <h2 class="game-title" style="font-size:1.9rem;">Duel Room</h2>
+          <p class="tagline">Up to 8 players. Same verse, same moment — first to find it <em>and prove it</em> wins the round.</p>
+        </div>
+
+        <div class="panel mt" id="duelEntryView">
+          <p class="section-label">Your name</p>
+          <input type="text" class="txt-input" id="duelName" maxlength="16" placeholder="e.g. Mercy" autocomplete="off" />
+          <div class="btn-row mt-lg">
+            <button type="button" class="btn btn-gold" id="hostBtn">Host a Room</button>
+          </div>
+          <p class="section-label mt-lg">Join a room</p>
+          <input type="text" class="txt-input code-input" id="joinCode" maxlength="4" placeholder="CODE" autocomplete="off" />
+          <div class="btn-row mt">
+            <button type="button" class="btn btn-brown" id="joinBtn">Join Room</button>
+          </div>
+          <div class="duel-error" id="duelError"></div>
+          <p class="small-note" style="text-align:left;">Duel Room needs internet for the first connection — even when you're all in the same room — then the phones talk directly to each other. The host's phone runs the game, so the host should stay on this page.</p>
+          <div class="btn-row mt">
+            <button type="button" class="btn btn-ghost" id="duelBackBtn">← Back to Setup</button>
+          </div>
+        </div>
+
+        <div class="panel mt" id="duelRoomView" style="display:none;">
+          <p class="section-label" style="text-align:center;">Room code</p>
+          <div class="code-big" id="duelCodeBig">····</div>
+          <p class="small-note" id="duelCodeHint">Tell your players: open this game, tap Duel Room, Join, and type this code.</p>
+          <p class="section-label mt-lg">Players · <span id="duelCount">1 of 8</span></p>
+          <div id="duelRoster"></div>
+          <div id="duelStyleHost" class="mt-lg">
+            <p class="section-label">Duel style (host picks)</p>
+            <div class="chip-row" id="duelStyleRow">
+              <button type="button" class="chip" data-dstyle="real">Real Bible Duel<small>find it in your own Bible, then prove it</small></button>
+              <button type="button" class="chip" data-dstyle="app">In-App Duel<small>race the Book › Chapter › Verse taps</small></button>
+            </div>
+            <p class="small-note" style="text-align:left;">Difficulty and rounds come from the Setup screen. Each player's Bible version stays their own choice.</p>
+          </div>
+          <p class="mt-lg" id="duelStyleGuest" style="font-weight:800; display:none;"></p>
+          <div class="btn-row mt-lg">
+            <button type="button" class="btn btn-gold" id="startDuelBtn">Start the Duel</button>
+            <button type="button" class="btn btn-gold" id="readyBtn" style="display:none;">Tap when you're Ready</button>
+          </div>
+          <p class="small-note" id="duelHostHint"></p>
+          <p class="small-note" id="duelWaitNote" style="display:none;">Waiting for the host to start…</p>
+          <div class="btn-row mt">
+            <button type="button" class="btn btn-ghost" id="duelLeaveBtn">Leave Room</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ SCREEN: DUEL PLAY ============ -->
+      <section class="screen" id="scr-duel-play">
+        <div class="statusbar">
+          <span class="sb-pill" id="duelRoundPill">Round 1 of 5</span>
+          <span class="sb-pill score" id="duelScorePill">Score 0</span>
+          <span class="spacer"></span>
+          <button type="button" class="icon-btn" id="duelPlayLeave">Leave</button>
+        </div>
+        <div class="timer-wrap">
+          <div class="timer-num"><span id="duelTimerNum">90</span><span class="t-lab">seconds to find it</span></div>
+          <div class="timer-bar"><div class="timer-fill" id="duelTimerFill"></div></div>
+        </div>
+        <div class="count-num" id="duelCountNum" style="display:none;">3</div>
+        <div class="parchment call-card">
+          <p class="call-shout">Sword in Hand!</p>
+          <p class="call-find">Find</p>
+          <p class="call-ref" id="duelCallRef">Get ready…</p>
+          <span class="call-diff" id="duelCallDiff">Duel</span>
+        </div>
+        <div class="duel-error" id="duelPlayBanner" style="display:none;"></div>
+        <div id="duelRealZone" class="mt-lg" style="display:none;">
+          <button type="button" class="btn found-btn" id="duelFoundBtn">FOUND IT!</button>
+          <p class="voice-status" id="duelVoiceStatus" style="display:none;">🎙️ Listening — say “Found it!”</p>
+          <p class="small-note">Tap FOUND IT the moment your eyes land on the verse — or just say “Found it!” if your Hands-Free Voice is on. First buzz wins the round, then the winner proves it.</p>
+        </div>
+        <div id="duelAppZone" class="mt-lg" style="display:none;">
+          <div class="step-track">
+            <div class="st" id="duelStBook">1 · Book</div>
+            <div class="st" id="duelStChapter">2 · Chapter</div>
+            <div class="st" id="duelStVerse">3 · Verse</div>
+          </div>
+          <p class="crumb" id="duelCrumb"><span class="dim">Start with the book…</span></p>
+          <p class="tap-feedback" id="duelTapFeedback" aria-live="polite"></p>
+          <div id="duelGridZone"></div>
+        </div>
+      </section>
+
+      <!-- ============ SCREEN: DUEL STANDINGS (between rounds) ============ -->
+      <section class="screen" id="scr-duel-stand">
+        <div class="statusbar">
+          <span class="sb-pill" id="duelStandPill">Round 1</span>
+          <span class="sb-pill score" id="duelStandScore">Score 0</span>
+          <span class="spacer"></span>
+          <button type="button" class="icon-btn" id="duelStandLeave">Leave</button>
+        </div>
+        <div class="panel">
+          <p class="duel-banner" id="duelStandTitle">🏆 Found it first!</p>
+          <p class="ready-sub" id="duelStandSub"></p>
+        </div>
+        <div class="parchment mt" id="duelStandVerseBox" style="display:none;">
+          <p class="verse-text" id="duelStandVerse"></p>
+          <p class="verse-ref-line" id="duelStandVerseRef"></p>
+          <p class="section-label mt" style="color:var(--leather-dark);">Standings</p>
+          <div id="duelStandList"></div>
+        </div>
+        <div class="btn-row mt-lg">
+          <button type="button" class="btn btn-gold" id="duelNextBtn" style="display:none;">Next Round</button>
+        </div>
+        <p class="small-note" id="duelStandWait" style="display:none;">Waiting for the host…</p>
+      </section>
+
+      <!-- ============ SCREEN: DUEL RESULTS ============ -->
+      <section class="screen" id="scr-duel-results">
+        <div class="title-wrap" style="padding-top:4px;">
+          <h2 class="game-title" style="font-size:1.9rem;">Duel Complete!</h2>
+          <p class="tagline" id="duelResultsLine">Final standings</p>
+        </div>
+        <p class="new-best" id="duelChamp"></p>
+        <div class="parchment mt">
+          <p class="section-label" style="color:var(--leather-dark);">Final Standings</p>
+          <div id="duelFinalList"></div>
+          <p class="section-label mt" style="color:var(--leather-dark);">Round by Round</p>
+          <ul class="result-list" id="duelRoundsList"></ul>
+        </div>
+        <div class="btn-row mt-lg">
+          <button type="button" class="btn btn-gold" id="duelAgainBtn" style="display:none;">Play Again — Back to the Room</button>
+        </div>
+        <p class="small-note" id="duelResultsWait" style="display:none;">Waiting for the host to start a new game…</p>
+        <div class="btn-row mt">
+          <button type="button" class="btn btn-ghost" id="duelResultsLeave">Leave Room</button>
         </div>
       </section>
 
@@ -790,13 +951,14 @@
       rounds: saved.rounds || 5,
       version: saved.version || "NLT",
       voice: saved.voice !== false,
-      handsFree: saved.handsFree !== undefined ? saved.handsFree : true
+      handsFree: saved.handsFree !== undefined ? saved.handsFree : true,
+      name: saved.name || ""
     };
     var best = saved.best || { verified:0, practice:0 };
 
     function persist(){
       var s = store.get();
-      s.mode = settings.mode; s.diff = settings.diff; s.rounds = settings.rounds; s.version = settings.version; s.voice = settings.voice; s.handsFree = settings.handsFree; s.best = best;
+      s.mode = settings.mode; s.diff = settings.diff; s.rounds = settings.rounds; s.version = settings.version; s.voice = settings.voice; s.handsFree = settings.handsFree; s.name = settings.name; s.best = best;
       store.set(s);
     }
 
@@ -1125,6 +1287,7 @@
       } else {
         G.streak = 0;
       }
+      if(G.duelHook){ var dh = G.duelHook; G.duelHook = null; dh(proven, reason, totalPts); return; }
       G.results.push({
         verse: v, proven: proven, reason: reason,
         timeUsed: proven || reason !== "timeout" ? G.elapsed : G.limit,
@@ -2005,6 +2168,959 @@
     }
     $("againBtn").addEventListener("click", function(){ startGame(false); });
     $("settingsBtn").addEventListener("click", function(){ G = null; refreshSetup(); show("scr-setup"); });
+
+    /* ================= DUEL ROOM (WebRTC star via PeerJS, host-authoritative) =================
+       One self-contained page: PeerJS is loaded on demand from a CDN and its free
+       public broker makes the first introduction; after that, messages travel
+       peer-to-peer. Guests connect ONLY to the host; the host relays everything,
+       orders buzzes by arrival, and owns scoring. Up to 8 players (1 host + 7). */
+    var DUEL_PREFIX = "swordinhand-";
+    var DUEL_MAX = 8;
+    var DUEL_CODE_CHARS = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"; // no O/0, I/1, L confusion
+    var PEERJS_URL = "https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js";
+    var D = null;
+
+    var peerJsWaiters = null;
+    function loadPeerJS(cb){
+      if(window.Peer){ cb(true); return; }
+      if(peerJsWaiters){ peerJsWaiters.push(cb); return; }
+      peerJsWaiters = [cb];
+      var done = false;
+      function finish(ok){
+        if(done) return; done = true;
+        var cbs = peerJsWaiters; peerJsWaiters = null;
+        cbs.forEach(function(f){ f(ok && !!window.Peer); });
+      }
+      var s = document.createElement("script");
+      s.src = PEERJS_URL;
+      s.onload = function(){ finish(true); };
+      s.onerror = function(){ finish(false); };
+      document.head.appendChild(s);
+      setTimeout(function(){ finish(false); }, 15000);
+    }
+
+    function duelPoints(elapsed, limit, wrong){
+      var frac = limit ? Math.max(0, 1 - elapsed / limit) : 0;
+      var pts = 20 + Math.round(80 * frac);
+      if(wrong) pts -= wrong * 5;
+      return Math.max(10, pts);
+    }
+    function makeRoomCode(){
+      var s = "";
+      for(var i = 0; i < 4; i++) s += DUEL_CODE_CHARS.charAt(Math.floor(Math.random() * DUEL_CODE_CHARS.length));
+      return s;
+    }
+    function newDuelState(role){
+      return {
+        role: role, peer: null, code: "", myId: role === "host" ? "host" : null,
+        players: [], conns: {}, seq: 0, hostConn: null,
+        style: "real", state: "lobby",
+        verses: [], limits: [], idx: 0, startAt: 0, roundStart: 0,
+        timerId: null, countInt: null, roundTimer: null, proofWatchdog: null, connectTimer: null,
+        stage: "book", pickedBook: null, pickedChapter: null, wrongTaps: 0,
+        iBuzzed: false, inputLocked: false,
+        winner: null, winElapsed: 0, pendingPoints: 0,
+        rounds: [], savedMode: null, tries: 0, inRoom: false
+      };
+    }
+    function playerById(id){
+      if(!D) return null;
+      for(var i = 0; i < D.players.length; i++) if(D.players[i].id === id) return D.players[i];
+      return null;
+    }
+    function pubPlayers(){ return D ? D.players : []; }
+    function standings(){
+      if(!D) return [];
+      return D.players.map(function(p){
+        return { id:p.id, name:p.name, score:p.score, isHost:!!p.isHost, connected:p.connected !== false };
+      }).sort(function(a, b){ return b.score - a.score; });
+    }
+    function connectedCount(){
+      if(!D) return 0;
+      return D.players.filter(function(p){ return p.connected !== false; }).length;
+    }
+
+    /* ---- duel UI helpers ---- */
+    function duelSetError(msg){
+      var el = $("duelError");
+      if(!el) return;
+      el.textContent = msg || "";
+      el.classList.toggle("show", !!msg);
+    }
+    function duelResetEntryButtons(){
+      var hb = $("hostBtn"), jb = $("joinBtn");
+      if(hb){ hb.disabled = false; hb.textContent = "Host a Room"; }
+      if(jb){ jb.disabled = false; jb.textContent = "Join Room"; }
+    }
+    function duelShowEntry(msg){
+      duelResetEntryButtons();
+      $("duelEntryView").style.display = "";
+      $("duelRoomView").style.display = "none";
+      show("scr-duel");
+      duelSetError(msg || "");
+    }
+    function duelPlayBannerShow(txt){
+      var b = $("duelPlayBanner");
+      if(!b) return;
+      b.textContent = txt;
+      b.style.display = "block";
+    }
+    function duelPlayBannerHide(){
+      var b = $("duelPlayBanner");
+      if(b) b.style.display = "none";
+    }
+    function renderMyScorePill(el){
+      if(!el || !D) return;
+      var me = playerById(D.myId);
+      el.textContent = "Score " + (me ? me.score : 0);
+    }
+    function stopDuelTimers(){
+      if(!D) return;
+      if(D.timerId){ clearInterval(D.timerId); D.timerId = null; }
+      if(D.countInt){ clearInterval(D.countInt); D.countInt = null; }
+      if(D.roundTimer){ clearTimeout(D.roundTimer); D.roundTimer = null; }
+      if(D.proofWatchdog){ clearTimeout(D.proofWatchdog); D.proofWatchdog = null; }
+    }
+    function duelCleanup(){
+      stopDuelCmd();
+      if(!D) return;
+      stopDuelTimers();
+      if(D.connectTimer){ clearTimeout(D.connectTimer); D.connectTimer = null; }
+      try{ if(D.peer) D.peer.destroy(); }catch(e){}
+      if(D.savedMode){ settings.mode = D.savedMode; }
+      D = null;
+    }
+    function duelFail(msg){
+      duelCleanup();
+      duelShowEntry(msg);
+    }
+    function duelReadName(){
+      var n = ($("duelName").value || "").trim().slice(0, 16);
+      if(!n){
+        duelSetError("Type your name first — it goes on the scoreboard so everyone can cheer for you.");
+        try{ $("duelName").focus(); }catch(e){}
+        return null;
+      }
+      settings.name = n; persist();
+      return n;
+    }
+    function showDuelRoom(){
+      if(!D) return;
+      D.inRoom = true; D.state = "lobby";
+      duelResetEntryButtons();
+      $("duelEntryView").style.display = "none";
+      $("duelRoomView").style.display = "";
+      $("duelCodeBig").textContent = D.code;
+      $("duelCodeHint").textContent = D.role === "host"
+        ? "Tell your players: open this game, tap Duel Room, Join, and type this code."
+        : "You're in! When the host starts, the same verse is called on every phone at the same time.";
+      duelSetError("");
+      show("scr-duel");
+      renderRoster();
+    }
+    function renderRoster(){
+      if(!D) return;
+      var list = $("duelRoster");
+      if(!list) return;
+      list.innerHTML = "";
+      D.players.forEach(function(p){
+        var row = document.createElement("div");
+        row.className = "player-row" + (p.connected === false ? " off" : "");
+        var nm = document.createElement("span"); nm.className = "p-name";
+        nm.textContent = p.name + (p.id === D.myId ? " (you)" : "");
+        row.appendChild(nm);
+        if(p.isHost){
+          var tg = document.createElement("span"); tg.className = "p-tag"; tg.textContent = "Host";
+          row.appendChild(tg);
+        }
+        var st = document.createElement("span");
+        if(p.connected === false){ st.className = "p-wait"; st.textContent = "disconnected"; }
+        else if(p.isHost || p.ready){ st.className = "p-ready"; st.textContent = "Ready ✓"; }
+        else { st.className = "p-wait"; st.textContent = "Not ready"; }
+        row.appendChild(st);
+        list.appendChild(row);
+      });
+      $("duelCount").textContent = connectedCount() + " of " + DUEL_MAX + " players";
+      var isHost = D.role === "host";
+      $("duelStyleHost").style.display = isHost ? "" : "none";
+      $("duelStyleGuest").style.display = isHost ? "none" : "";
+      $("duelStyleGuest").textContent = "Duel style: " + (D.style === "real" ? "Real Bible Duel" : "In-App Duel");
+      document.querySelectorAll("#duelStyleRow .chip").forEach(function(ch){
+        ch.classList.toggle("selected", ch.getAttribute("data-dstyle") === D.style);
+      });
+      $("startDuelBtn").style.display = isHost ? "" : "none";
+      $("readyBtn").style.display = isHost ? "none" : "";
+      var me = playerById(D.myId);
+      if(me && !isHost) $("readyBtn").textContent = me.ready ? "✓ Ready — tap to change" : "Tap when you're Ready";
+      $("duelWaitNote").style.display = isHost ? "none" : "";
+      var n = connectedCount();
+      $("startDuelBtn").disabled = n < 2;
+      $("duelHostHint").textContent = isHost
+        ? (n < 2 ? "You need at least 2 players — share your code and wait for someone to join." : "Everyone's in! Pick the duel style above, then start. Difficulty & rounds come from the Setup screen.")
+        : "";
+      $("duelLeaveBtn").textContent = isHost ? "End Room" : "Leave Room";
+    }
+    function renderStandingsInto(el, rows){
+      if(!el) return;
+      el.innerHTML = "";
+      if(!rows || !rows.length){ el.innerHTML = '<p class="empty-note">No players.</p>'; return; }
+      rows.forEach(function(p, i){
+        var row = document.createElement("div");
+        row.className = "stand-row" + (D && p.id === D.myId ? " me" : "");
+        var l = document.createElement("span");
+        l.textContent = (i + 1) + ". " + p.name + (D && p.id === D.myId ? " (you)" : "") + (p.connected === false ? " — left" : "");
+        var r = document.createElement("span"); r.className = "sr-pts"; r.textContent = p.score + " pts";
+        row.appendChild(l); row.appendChild(r);
+        el.appendChild(row);
+      });
+    }
+
+    /* ---- host ---- */
+    function hostRoom(){
+      var name = duelReadName();
+      if(!name) return;
+      duelSetError("");
+      $("hostBtn").disabled = true; $("hostBtn").textContent = "Starting room…";
+      duelCleanup();
+      D = newDuelState("host");
+      D.players = [{ id:"host", name:name, isHost:true, ready:true, connected:true, score:0 }];
+      loadPeerJS(function(ok){
+        if(!D) return;
+        if(!ok){
+          duelFail("Duel Room needs the internet for the first connection — the multiplayer service couldn't be loaded. Check your connection and try again. Solo play still works fine.");
+          return;
+        }
+        D.code = makeRoomCode();
+        D.tries = 0;
+        tryCreateHostPeer();
+      });
+    }
+    function tryCreateHostPeer(){
+      if(!D) return;
+      D.tries += 1;
+      var peer;
+      try{ peer = new Peer(DUEL_PREFIX + D.code); }
+      catch(e){ duelFail("Couldn't start the room. Check your internet connection and try again."); return; }
+      D.peer = peer;
+      var opened = false;
+      if(D.connectTimer) clearTimeout(D.connectTimer);
+      D.connectTimer = setTimeout(function(){
+        if(!opened) duelFail("Couldn't start the room — the connection service didn't answer in time. Check your internet and try hosting again.");
+      }, 15000);
+      peer.on("open", function(){
+        if(!D) return;
+        opened = true;
+        if(D.connectTimer){ clearTimeout(D.connectTimer); D.connectTimer = null; }
+        showDuelRoom();
+      });
+      peer.on("error", function(err){
+        if(!D) return;
+        if(err && err.type === "unavailable-id"){
+          // that room code is already taken — quietly try another code
+          if(D.tries < 6){
+            D.code = makeRoomCode();
+            try{ peer.destroy(); }catch(e){}
+            tryCreateHostPeer();
+          } else {
+            duelFail("Couldn't find a free room code — please try hosting once more.");
+          }
+        } else if(!opened){
+          duelFail("Couldn't start the room — the connection service couldn't be reached. Check your internet and try again.");
+        }
+      });
+      peer.on("connection", hostOnConn);
+      peer.on("disconnected", function(){ try{ peer.reconnect(); }catch(e){} });
+    }
+    function hostOnConn(conn){
+      if(!D || D.role !== "host") return;
+      conn.on("open", function(){
+        if(!D || D.role !== "host") return;
+        var name = (conn.metadata && conn.metadata.name) || "Player";
+        name = String(name).slice(0, 16);
+        if(D.state !== "lobby"){
+          try{ conn.send({ t:"roomerror", msg:"Game already started — wait for the next one, or join after this game ends and the room is back in the lobby." }); }catch(e){}
+          setTimeout(function(){ try{ conn.close(); }catch(e){} }, 500);
+          return;
+        }
+        if(connectedCount() >= DUEL_MAX){
+          try{ conn.send({ t:"roomerror", msg:"Room full — this room already has 8 players." }); }catch(e){}
+          setTimeout(function(){ try{ conn.close(); }catch(e){} }, 500);
+          return;
+        }
+        var id = "p" + (++D.seq);
+        D.players.push({ id:id, name:name, isHost:false, ready:false, connected:true, score:0 });
+        D.conns[id] = conn;
+        conn.on("data", function(msg){ hostOnGuestData(id, msg); });
+        conn.on("close", function(){ hostGuestGone(id); });
+        conn.on("error", function(){ hostGuestGone(id); });
+        try{ conn.send({ t:"welcome", you:id, players:pubPlayers(), style:D.style }); }catch(e){}
+        hostBroadcastPlayers();
+      });
+    }
+    function hostBroadcastPlayers(){
+      hostEmit({ t:"players", players:pubPlayers(), style:D.style });
+    }
+    function hostEmit(msg){
+      if(!D || D.role !== "host") return;
+      hostBroadcastOnly(msg);
+      duelApply(msg);
+    }
+    function hostBroadcastOnly(msg){
+      if(!D) return;
+      for(var id in D.conns){
+        var c = D.conns[id];
+        if(c && c.open){ try{ c.send(msg); }catch(e){} }
+      }
+    }
+    function hostOnGuestData(id, msg){
+      if(!D || D.role !== "host" || !msg) return;
+      var p = playerById(id);
+      if(msg.t === "ready" && p){ p.ready = !!msg.ready; hostBroadcastPlayers(); }
+      else if(msg.t === "buzz"){ hostBuzz(id, msg.elapsed, msg.wrong); }
+      else if(msg.t === "proof"){ hostProof(id, !!msg.ok); }
+      else if(msg.t === "leave"){ hostGuestGone(id); }
+    }
+    function hostGuestGone(id){
+      if(!D || D.role !== "host") return;
+      var p = playerById(id);
+      if(!p || p.connected === false) return;
+      delete D.conns[id];
+      if(D.state === "lobby"){
+        D.players = D.players.filter(function(x){ return x.id !== id; });
+      } else {
+        p.connected = false;
+      }
+      hostBroadcastPlayers();
+      // if the player who was proving it left, the round can't be proven
+      if(D.state === "proof" && D.winner === id) hostResolveRound(false);
+    }
+    function hostStartGame(){
+      if(!D || D.role !== "host" || connectedCount() < 2) return;
+      var pool = VERSES.filter(function(v){ return settings.diff === "mixed" || v.d === settings.diff; });
+      var deck = shuffle(pool.slice()).slice(0, settings.rounds);
+      D.verses = deck.map(function(v){ return { b:v.b, c:v.c, v:v.v, vc:v.vc, d:v.d, t:v.t }; });
+      D.limits = deck.map(function(v){ return settings.diff === "mixed" ? TIME_LIMITS[v.d] : TIME_LIMITS[settings.diff]; });
+      D.rounds = [];
+      D.idx = 0;
+      D.players.forEach(function(p){ p.score = 0; });
+      D.state = "countdown";
+      hostEmit({
+        t:"start", style:D.style, verses:D.verses, limits:D.limits,
+        startAt: Date.now() + 4500,
+        diffLabel: settings.diff === "mixed" ? "Mixed" : DIFF_LABEL[settings.diff]
+      });
+    }
+    function hostNext(){
+      if(!D || D.role !== "host" || D.state !== "stand") return;
+      if(D.idx >= D.verses.length - 1){
+        D.state = "over";
+        hostEmit({ t:"gameover", standings:standings(), rounds:D.rounds });
+      } else {
+        D.idx += 1;
+        D.state = "countdown";
+        D.winner = null;
+        hostEmit({ t:"round", idx:D.idx, startAt: Date.now() + 3500 });
+      }
+    }
+    function hostPlayAgain(){
+      if(!D || D.role !== "host") return;
+      stopDuelTimers();
+      D.players.forEach(function(p){ p.score = 0; });
+      D.rounds = [];
+      D.winner = null;
+      D.state = "lobby";
+      hostEmit({ t:"lobby", players:pubPlayers(), style:D.style });
+    }
+    function hostBuzz(pid, elapsed, wrong){
+      if(!D || D.role !== "host") return;
+      if(D.state !== "search"){
+        if(pid !== "host"){
+          var c = D.conns[pid];
+          if(c && c.open){ try{ c.send({ t:"decided" }); }catch(e){} }
+        }
+        return;
+      }
+      D.winner = pid;
+      D.winElapsed = elapsed;
+      D.pendingPoints = duelPoints(elapsed, D.limits[D.idx], wrong || 0);
+      if(D.roundTimer){ clearTimeout(D.roundTimer); D.roundTimer = null; }
+      var w = playerById(pid);
+      var wname = w ? w.name : "A player";
+      if(D.style === "app"){
+        D.state = "resolving";
+        hostEmit({ t:"buzzwin", id:pid, name:wname, elapsed:elapsed });
+        setTimeout(function(){
+          if(D && D.role === "host" && D.state === "resolving" && D.winner === pid) hostResolveRound(true);
+        }, 700);
+      } else {
+        D.state = "proof";
+        hostEmit({ t:"buzzwin", id:pid, name:wname, elapsed:elapsed });
+        D.proofWatchdog = setTimeout(function(){
+          if(D && D.state === "proof" && D.winner === pid) hostResolveRound(false);
+        }, 80000);
+      }
+    }
+    function hostProof(pid, ok){
+      if(!D || D.role !== "host" || D.state !== "proof" || D.winner !== pid) return;
+      hostResolveRound(ok);
+    }
+    function hostResolveRound(ok){
+      if(!D || D.role !== "host") return;
+      if(D.proofWatchdog){ clearTimeout(D.proofWatchdog); D.proofWatchdog = null; }
+      if(D.roundTimer){ clearTimeout(D.roundTimer); D.roundTimer = null; }
+      var v = D.verses[D.idx];
+      var w = D.winner ? playerById(D.winner) : null;
+      var pts = (ok && w) ? D.pendingPoints : 0;
+      if(ok && w) w.score += pts;
+      D.rounds.push({
+        ref: refOf(v),
+        winnerName: w ? w.name : null,
+        elapsed: D.winner ? D.winElapsed : null,
+        ok: !!ok, points: pts
+      });
+      D.state = "stand";
+      hostEmit({
+        t:"roundend", idx:D.idx,
+        winnerId: D.winner, winnerName: w ? w.name : null,
+        ok: !!ok, points: pts, elapsed: D.winner ? D.winElapsed : null,
+        verse: { b:v.b, c:v.c, v:v.v, d:v.d, t:v.t },
+        standings: standings(), players: pubPlayers(),
+        last: D.idx >= D.verses.length - 1
+      });
+    }
+
+    /* ---- guest ---- */
+    function joinRoom(){
+      var name = duelReadName();
+      if(!name) return;
+      var code = ($("joinCode").value || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+      if(code.length !== 4){
+        duelSetError("Enter the 4-character room code from the host's screen.");
+        return;
+      }
+      duelSetError("");
+      $("joinBtn").disabled = true; $("joinBtn").textContent = "Connecting…";
+      duelCleanup();
+      D = newDuelState("guest");
+      D.code = code;
+      loadPeerJS(function(ok){
+        if(!D) return;
+        if(!ok){
+          duelFail("Duel Room needs the internet for the first connection — the multiplayer service couldn't be loaded. Check your connection and try again. Solo play still works fine.");
+          return;
+        }
+        var peer;
+        try{ peer = new Peer(); }
+        catch(e){ duelFail("Couldn't connect. Check your internet and try again."); return; }
+        D.peer = peer;
+        var opened = false;
+        D.connectTimer = setTimeout(function(){
+          duelFail("Couldn't reach that room in time. Check the code, make sure the host has the room open, and try again.");
+        }, 15000);
+        peer.on("open", function(){
+          if(!D) return;
+          var conn = peer.connect(DUEL_PREFIX + code, { metadata:{ name:name }, reliable:true });
+          D.hostConn = conn;
+          conn.on("open", function(){ opened = true; });
+          conn.on("data", function(msg){ guestOnData(msg); });
+          conn.on("close", function(){
+            if(D && D.inRoom) duelFail("The host left the room, so this duel is over.");
+            else if(D) duelFail("The connection to the host was lost. Check the code and try again.");
+          });
+          conn.on("error", function(){});
+        });
+        peer.on("error", function(err){
+          if(!D) return;
+          if(err && err.type === "peer-unavailable"){
+            duelFail("No room with code " + code + " is open right now. Check the code — the host may not have the room open yet.");
+          } else if(!opened){
+            duelFail("Couldn't connect to that room. Check your internet and the code, then try again.");
+          }
+        });
+      });
+    }
+    function guestSend(o){
+      if(D && D.hostConn && D.hostConn.open){ try{ D.hostConn.send(o); }catch(e){} }
+    }
+    function guestOnData(msg){
+      if(!D || !msg) return;
+      if(msg.t === "welcome"){
+        if(D.connectTimer){ clearTimeout(D.connectTimer); D.connectTimer = null; }
+        D.myId = msg.you;
+        D.players = msg.players || [];
+        D.style = msg.style || "real";
+        showDuelRoom();
+        return;
+      }
+      if(msg.t === "roomerror"){ duelFail(msg.msg || "That room could not be joined."); return; }
+      if(msg.t === "ended"){ duelFail("The host ended the room. You can host your own room or join another one."); return; }
+      duelApply(msg);
+    }
+
+    /* ---- shared message application (host applies its own broadcasts too) ---- */
+    function duelApply(msg){
+      if(!D || !msg) return;
+      switch(msg.t){
+        case "players":
+          D.players = msg.players || D.players;
+          if(msg.style) D.style = msg.style;
+          if(D.state === "lobby") renderRoster();
+          renderMyScorePill($("duelScorePill"));
+          break;
+        case "start":
+          D.style = msg.style;
+          D.verses = msg.verses;
+          D.limits = msg.limits;
+          D.idx = 0;
+          D.rounds = [];
+          enterDuelMode();
+          beginDuelCountdown(msg.startAt);
+          break;
+        case "round":
+          D.idx = msg.idx;
+          beginDuelCountdown(msg.startAt);
+          break;
+        case "buzzwin": onBuzzWin(msg); break;
+        case "decided":
+          duelPlayBannerShow("That round is already decided — waiting for the scoreboard…");
+          break;
+        case "roundend": onRoundEnd(msg); break;
+        case "gameover": onGameOver(msg); break;
+        case "lobby":
+          D.players = msg.players || D.players;
+          if(msg.style) D.style = msg.style;
+          D.state = "lobby";
+          showDuelRoom();
+          break;
+      }
+    }
+    function enterDuelMode(){
+      if(!D) return;
+      if(D.savedMode === null) D.savedMode = settings.mode;
+      settings.mode = D.style === "real" ? "real" : "app";
+    }
+
+    /* ---- duel round flow (every device) ---- */
+    function beginDuelCountdown(startAt){
+      if(!D) return;
+      stopDuelTimers(); stopDuelCmd(); stopSpeech();
+      D.state = "countdown";
+      D.startAt = startAt;
+      D.roundStart = startAt;
+      D.winner = null;
+      D.iBuzzed = false;
+      D.inputLocked = false;
+      D.wrongTaps = 0;
+      D.stage = "book"; D.pickedBook = null; D.pickedChapter = null;
+      var v = D.verses[D.idx];
+      show("scr-duel-play");
+      $("duelRoundPill").textContent = "Round " + (D.idx + 1) + " of " + D.verses.length;
+      renderMyScorePill($("duelScorePill"));
+      $("duelCallRef").textContent = "Get ready…";
+      $("duelCallDiff").textContent = (D.style === "real" ? "Real Bible Duel" : "In-App Duel") + " · " + D.limits[D.idx] + " sec";
+      $("duelTimerNum").textContent = D.limits[D.idx];
+      $("duelTimerNum").parentElement.classList.remove("low");
+      $("duelTimerFill").style.width = "100%";
+      $("duelTimerFill").classList.remove("low");
+      $("duelRealZone").style.display = "none";
+      $("duelAppZone").style.display = "none";
+      duelPlayBannerHide();
+      $("duelFoundBtn").disabled = false;
+      var cn = $("duelCountNum");
+      cn.style.display = "";
+      var tick = function(){
+        if(!D || D.state !== "countdown") return;
+        var left = D.startAt - Date.now();
+        if(left <= 0){
+          cn.style.display = "none";
+          beginDuelSearch();
+          return;
+        }
+        cn.textContent = Math.ceil(left / 1000);
+        cn.classList.remove("pop"); void cn.offsetWidth; cn.classList.add("pop");
+      };
+      tick();
+      D.countInt = setInterval(tick, 100);
+    }
+    function beginDuelSearch(){
+      if(!D) return;
+      if(D.countInt){ clearInterval(D.countInt); D.countInt = null; }
+      D.state = "search";
+      var v = D.verses[D.idx];
+      var limit = D.limits[D.idx];
+      $("duelCallRef").textContent = refOf(v);
+      $("duelCallDiff").textContent = (DIFF_LABEL[v.d] || "Verse") + " · " + limit + " sec · " + (D.style === "real" ? "Real Bible Duel" : "In-App Duel");
+      $("duelRealZone").style.display = D.style === "real" ? "" : "none";
+      $("duelAppZone").style.display = D.style === "app" ? "" : "none";
+      if(D.style === "app") buildDuelGrid();
+      currentCall = "Sword in hand! Find " + spokenRef(v) + ".";
+      speakText(currentCall, function(){ armDuelCmd(); });
+      D.timerId = setInterval(function(){
+        if(!D || D.state !== "search") return;
+        var rem = limit - (Date.now() - D.roundStart) / 1000;
+        duelUpdateTimer(rem, limit);
+        if(rem <= 0 && !D.inputLocked){
+          D.inputLocked = true;
+          stopDuelCmd();
+          $("duelFoundBtn").disabled = true;
+          duelPlayBannerShow("Time's up! Waiting for the host…");
+        }
+      }, 100);
+      duelUpdateTimer(limit, limit);
+      if(D.role === "host"){
+        var delay = Math.max(60, D.roundStart + limit * 1000 + 600 - Date.now());
+        D.roundTimer = setTimeout(function(){
+          if(D && D.state === "search"){ D.winner = null; hostResolveRound(false); }
+        }, delay);
+      }
+    }
+    function duelUpdateTimer(rem, limit){
+      rem = Math.max(0, rem);
+      $("duelTimerNum").textContent = Math.ceil(rem);
+      $("duelTimerNum").parentElement.classList.toggle("low", rem <= 10);
+      var fill = $("duelTimerFill");
+      fill.style.width = (limit ? (rem / limit) * 100 : 0) + "%";
+      fill.classList.toggle("low", rem <= 10);
+    }
+    function duelBuzzLocal(wrong){
+      if(!D || D.state !== "search" || D.inputLocked || D.iBuzzed) return;
+      D.iBuzzed = true;
+      D.inputLocked = true;
+      stopDuelCmd();
+      var elapsed = Math.max(0, (Date.now() - D.roundStart) / 1000);
+      $("duelFoundBtn").disabled = true;
+      duelPlayBannerShow("You buzzed in! The host is calling it…");
+      if(D.role === "host") hostBuzz("host", elapsed, wrong || 0);
+      else guestSend({ t:"buzz", elapsed:elapsed, wrong: wrong || 0 });
+    }
+    function onBuzzWin(msg){
+      if(!D) return;
+      stopDuelTimers(); stopDuelCmd(); stopSpeech();
+      D.winner = msg.id;
+      D.winElapsed = msg.elapsed;
+      duelPlayBannerHide();
+      if(msg.id === D.myId){
+        if(D.style === "real"){
+          D.state = "proof";
+          duelStartMyProof();
+        } else {
+          D.state = "stand";
+          showDuelStandWaiting("🏆 You found it first!", "You finished in " + msg.elapsed.toFixed(1) + " seconds. Scores coming…");
+        }
+      } else {
+        D.state = D.style === "real" ? "proof" : "stand";
+        showDuelStandWaiting(
+          "🏆 " + msg.name + " found it first — " + msg.elapsed.toFixed(1) + " seconds!",
+          D.style === "real" ? (msg.name + " is proving it now…") : "Scores coming…"
+        );
+      }
+    }
+    function showDuelStandWaiting(title, sub){
+      if(!D) return;
+      $("duelStandPill").textContent = "Round " + (D.idx + 1) + " of " + D.verses.length;
+      renderMyScorePill($("duelStandScore"));
+      $("duelStandTitle").textContent = title;
+      $("duelStandSub").textContent = sub;
+      $("duelStandVerseBox").style.display = "none";
+      $("duelNextBtn").style.display = "none";
+      $("duelStandWait").style.display = "none";
+      show("scr-duel-stand");
+    }
+    function duelStartMyProof(){
+      if(!D) return;
+      var v = D.verses[D.idx];
+      G = newGame(true);
+      G.verse = v;
+      G.idx = D.idx;
+      G.limit = D.limits[D.idx];
+      G.elapsed = D.winElapsed;
+      G.remaining = Math.max(0, G.limit - D.winElapsed);
+      G.hintUsed = false;
+      G.wrongTaps = 0;
+      G.findPoints = speedPoints();
+      G.lockedPoints = G.findPoints;
+      G.duelHook = function(proven){
+        if(!D) return;
+        if(D.role === "host"){
+          hostProof("host", proven);
+        } else {
+          guestSend({ t:"proof", ok:proven });
+          showDuelStandWaiting("Proof sent!", "Waiting for the host's scoreboard…");
+        }
+      };
+      startProof();
+    }
+    function onRoundEnd(msg){
+      if(!D) return;
+      stopDuelTimers(); stopDuelCmd(); stopSpeech();
+      D.state = "stand";
+      if(msg.players) D.players = msg.players;
+      $("duelStandPill").textContent = "Round " + (msg.idx + 1) + " of " + D.verses.length;
+      renderMyScorePill($("duelStandScore"));
+      var title, sub;
+      if(msg.winnerId){
+        var mine = msg.winnerId === D.myId;
+        if(msg.ok){
+          title = mine ? "🏆 You found it & proved it!" : "🏆 " + msg.winnerName + " found it & proved it!";
+        } else {
+          title = mine ? "You found it first — but not proven" : "🏆 " + msg.winnerName + " found it first — not proven";
+        }
+        sub = "Found in " + msg.elapsed.toFixed(1) + " seconds · " + (msg.ok ? ("+" + msg.points + " pts") : "0 pts");
+      } else {
+        title = "Time's Up — Nobody Found It";
+        sub = "No points this round. Read the verse and be ready for the next one.";
+      }
+      $("duelStandTitle").textContent = title;
+      $("duelStandSub").textContent = sub;
+      $("duelStandVerse").textContent = "\u201C" + msg.verse.t + "\u201D";
+      $("duelStandVerseRef").textContent = "— " + refOf(msg.verse) + " (KJV)";
+      $("duelStandVerseBox").style.display = "";
+      renderStandingsInto($("duelStandList"), msg.standings);
+      var isHost = D.role === "host";
+      $("duelNextBtn").style.display = isHost ? "" : "none";
+      $("duelNextBtn").textContent = msg.last ? "See Final Results" : "Next Round";
+      $("duelStandWait").style.display = isHost ? "none" : "";
+      $("duelStandWait").textContent = "Waiting for the host…";
+      show("scr-duel-stand");
+    }
+    function onGameOver(msg){
+      if(!D) return;
+      stopDuelTimers(); stopDuelCmd(); stopSpeech();
+      D.state = "over";
+      (msg.standings || []).forEach(function(s){
+        var p = playerById(s.id);
+        if(p) p.score = s.score;
+      });
+      var champ = msg.standings && msg.standings[0];
+      $("duelChamp").textContent = champ ? ("🏆 Champion: " + champ.name + " — " + champ.score + " pts") : "";
+      $("duelResultsLine").textContent = "Duel · " + (msg.rounds || []).length + " rounds · " + (D.style === "real" ? "Real Bible Duel" : "In-App Duel");
+      renderStandingsInto($("duelFinalList"), msg.standings || []);
+      var ul = $("duelRoundsList");
+      ul.innerHTML = "";
+      (msg.rounds || []).forEach(function(r){
+        var li = document.createElement("li");
+        var ref = document.createElement("span"); ref.className = "rr"; ref.textContent = r.ref;
+        var mid = document.createElement("span"); mid.className = "rt";
+        mid.textContent = r.winnerName
+          ? (r.winnerName + " · " + r.elapsed.toFixed(1) + "s" + (r.ok ? " · proven" : " · not proven"))
+          : "no winner";
+        var pts = document.createElement("span"); pts.className = "rp";
+        pts.textContent = r.ok ? ("+" + r.points + " pts") : "0 pts";
+        li.appendChild(ref); li.appendChild(mid); li.appendChild(pts);
+        ul.appendChild(li);
+      });
+      var isHost = D.role === "host";
+      $("duelAgainBtn").style.display = isHost ? "" : "none";
+      $("duelResultsWait").style.display = isHost ? "none" : "";
+      show("scr-duel-results");
+    }
+
+    /* ---- hands-free "Found it" for duels (own device, own setting) ---- */
+    var duelRec = null, duelRecOn = false;
+    function duelHfOn(){
+      return D && D.style === "real" && settings.handsFree && !voiceBroken && !!srCtor();
+    }
+    function armDuelCmd(){
+      if(!duelHfOn() || !D || D.state !== "search" || D.inputLocked) return;
+      $("duelVoiceStatus").style.display = "";
+      startDuelCmd();
+    }
+    function startDuelCmd(){
+      if(duelRec) return;
+      var SR = srCtor();
+      if(!SR) return;
+      try{ duelRec = new SR(); }catch(e){ duelRec = null; return; }
+      duelRec.lang = "en-US";
+      duelRec.interimResults = true;
+      duelRec.continuous = true;
+      duelRecOn = true;
+      duelRec.onresult = function(ev){
+        if(!D || D.state !== "search" || D.inputLocked) return;
+        var txt = "";
+        for(var i = 0; i < ev.results.length; i++) txt += ev.results[i][0].transcript + " ";
+        if(foundItHeard(txt)){ chimeFound(); duelBuzzLocal(0); }
+      };
+      duelRec.onerror = function(ev){
+        if(ev.error === "not-allowed" || ev.error === "service-not-allowed" || ev.error === "audio-capture"){
+          stopDuelCmd();
+          var vs = $("duelVoiceStatus");
+          if(vs){ vs.style.display = ""; vs.textContent = "🎙️ Mic blocked — tap FOUND IT instead."; }
+        }
+      };
+      duelRec.onend = function(){
+        if(duelRecOn && D && D.state === "search" && !D.inputLocked){
+          try{ duelRec.start(); }catch(e){}
+        }
+      };
+      try{ duelRec.start(); }catch(e){}
+    }
+    function stopDuelCmd(){
+      duelRecOn = false;
+      if(duelRec){
+        try{ duelRec.onresult = null; duelRec.onend = null; duelRec.onerror = null; duelRec.stop(); }catch(e){}
+        duelRec = null;
+      }
+      var vs = $("duelVoiceStatus");
+      if(vs) vs.style.display = "none";
+    }
+
+    /* ---- In-App Duel tap grids ---- */
+    function duelSetSteps(){
+      $("duelStBook").className = "st " + (D.stage === "book" ? "now" : "done");
+      $("duelStChapter").className = "st " + (D.stage === "chapter" ? "now" : (D.stage === "verse" ? "done" : ""));
+      $("duelStVerse").className = "st " + (D.stage === "verse" ? "now" : "");
+    }
+    function buildDuelGrid(){
+      if(!D) return;
+      duelSetSteps();
+      var el = $("duelCrumb");
+      if(D.stage === "book") el.innerHTML = '<span class="dim">Start with the book…</span>';
+      else if(D.stage === "chapter") el.innerHTML = esc(D.pickedBook) + ' <span class="dim">— now the chapter</span>';
+      else el.innerHTML = esc(D.pickedBook) + " " + D.pickedChapter + ' <span class="dim">— now the verse</span>';
+      $("duelTapFeedback").textContent = "";
+      var zone = $("duelGridZone");
+      zone.innerHTML = "";
+      var v = D.verses[D.idx];
+      if(D.stage === "book"){
+        ["OT","NT"].forEach(function(test){
+          var h = document.createElement("p"); h.className = "grid-head";
+          h.textContent = test === "OT" ? "Old Testament" : "New Testament";
+          zone.appendChild(h);
+          var grid = document.createElement("div"); grid.className = "tap-grid";
+          BOOKS.filter(function(b){ return b[2] === test; }).forEach(function(b){
+            var cell = document.createElement("button");
+            cell.type = "button"; cell.className = "tap-cell"; cell.textContent = b[0];
+            cell.addEventListener("click", function(){ duelTapBook(b[0], cell); });
+            grid.appendChild(cell);
+          });
+          zone.appendChild(grid);
+        });
+      } else if(D.stage === "chapter"){
+        var n = BOOKMAP[D.pickedBook].chapters;
+        var h2 = document.createElement("p"); h2.className = "grid-head";
+        h2.textContent = "Chapters in " + D.pickedBook;
+        zone.appendChild(h2);
+        var grid2 = document.createElement("div"); grid2.className = "tap-grid nums";
+        for(var i = 1; i <= n; i++){
+          (function(num){
+            var cell = document.createElement("button");
+            cell.type = "button"; cell.className = "tap-cell"; cell.textContent = num;
+            cell.addEventListener("click", function(){ duelTapChapter(num, cell); });
+            grid2.appendChild(cell);
+          })(i);
+        }
+        zone.appendChild(grid2);
+      } else {
+        var h3 = document.createElement("p"); h3.className = "grid-head";
+        h3.textContent = "Verses in " + D.pickedBook + " " + D.pickedChapter;
+        zone.appendChild(h3);
+        var grid3 = document.createElement("div"); grid3.className = "tap-grid nums";
+        for(var j = 1; j <= v.vc; j++){
+          (function(num){
+            var cell = document.createElement("button");
+            cell.type = "button"; cell.className = "tap-cell"; cell.textContent = num;
+            cell.addEventListener("click", function(){ duelTapVerse(num, cell); });
+            grid3.appendChild(cell);
+          })(j);
+        }
+        zone.appendChild(grid3);
+      }
+    }
+    function duelGuard(){ return D && D.state === "search" && !D.inputLocked; }
+    function duelWrongTap(cell, what){
+      D.wrongTaps += 1;
+      cell.classList.add("wrong");
+      cell.disabled = true;
+      $("duelTapFeedback").textContent = "Not the " + what + " — keep searching! (−5 pts)";
+    }
+    function duelTapBook(name, cell){
+      if(!duelGuard() || D.stage !== "book") return;
+      if(name === D.verses[D.idx].b){
+        cell.classList.add("right");
+        $("duelTapFeedback").textContent = name + " — that's the book!";
+        D.pickedBook = name;
+        setTimeout(function(){
+          if(!duelGuard()) return;
+          if(isSingleChapter(name)){ D.pickedChapter = 1; D.stage = "verse"; }
+          else D.stage = "chapter";
+          buildDuelGrid();
+        }, 400);
+      } else duelWrongTap(cell, "book");
+    }
+    function duelTapChapter(num, cell){
+      if(!duelGuard() || D.stage !== "chapter") return;
+      if(num === D.verses[D.idx].c){
+        cell.classList.add("right");
+        $("duelTapFeedback").textContent = "Chapter " + num + " — right chapter!";
+        D.pickedChapter = num;
+        setTimeout(function(){ if(duelGuard()){ D.stage = "verse"; buildDuelGrid(); } }, 400);
+      } else duelWrongTap(cell, "chapter");
+    }
+    function duelTapVerse(num, cell){
+      if(!duelGuard() || D.stage !== "verse") return;
+      if(num === D.verses[D.idx].v){
+        cell.classList.add("right");
+        $("duelTapFeedback").textContent = "Verse " + num + " — FOUND IT!";
+        D.inputLocked = true;
+        setTimeout(function(){ duelBuzzLocal(D.wrongTaps); }, 350);
+      } else duelWrongTap(cell, "verse");
+    }
+
+    /* ---- duel entry / leaving / wiring ---- */
+    function openDuel(){
+      ensureAudio();
+      if(D && D.inRoom){ showDuelRoom(); return; }
+      if(D) duelCleanup();
+      $("duelName").value = settings.name || "";
+      duelShowEntry("");
+    }
+    function leaveDuel(){
+      if(!D){ refreshSetup(); show("scr-setup"); return; }
+      if(D.role === "host") hostBroadcastOnly({ t:"ended" });
+      else guestSend({ t:"leave" });
+      duelCleanup();
+      refreshSetup();
+      show("scr-setup");
+    }
+    $("duelEntryBtn").addEventListener("click", openDuel);
+    $("duelBackBtn").addEventListener("click", function(){
+      if(D && !D.inRoom) duelCleanup();
+      refreshSetup();
+      show("scr-setup");
+    });
+    $("hostBtn").addEventListener("click", hostRoom);
+    $("joinBtn").addEventListener("click", joinRoom);
+    $("joinCode").addEventListener("input", function(){
+      var el = $("joinCode");
+      el.value = el.value.toUpperCase();
+    });
+    $("joinCode").addEventListener("keydown", function(ev){
+      if(ev.key === "Enter") joinRoom();
+    });
+    document.querySelectorAll("#duelStyleRow .chip").forEach(function(ch){
+      ch.addEventListener("click", function(){
+        if(!D || D.role !== "host") return;
+        D.style = ch.getAttribute("data-dstyle");
+        hostBroadcastPlayers();
+        renderRoster();
+      });
+    });
+    $("readyBtn").addEventListener("click", function(){
+      if(!D || D.role !== "guest") return;
+      var me = playerById(D.myId);
+      if(!me) return;
+      me.ready = !me.ready;
+      guestSend({ t:"ready", ready:me.ready });
+      renderRoster();
+    });
+    $("startDuelBtn").addEventListener("click", hostStartGame);
+    $("duelNextBtn").addEventListener("click", hostNext);
+    $("duelAgainBtn").addEventListener("click", hostPlayAgain);
+    $("duelFoundBtn").addEventListener("click", function(){ duelBuzzLocal(0); });
+    $("duelLeaveBtn").addEventListener("click", leaveDuel);
+    $("duelPlayLeave").addEventListener("click", leaveDuel);
+    $("duelStandLeave").addEventListener("click", leaveDuel);
+    $("duelResultsLeave").addEventListener("click", leaveDuel);
 
     /* ================= INIT ================= */
     refreshSetup();
