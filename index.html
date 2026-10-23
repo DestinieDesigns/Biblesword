@@ -276,10 +276,24 @@
       .switch-link{ display:inline-block; background:none; border:none; cursor:pointer; font:inherit; font-weight:800; color:var(--leather-dark); text-decoration:underline; padding:10px 6px; }
       .fallback-note{ background:var(--bad-bg); border:2px solid var(--bad); color:var(--ink); border-radius:12px; padding:12px 14px; font-weight:700; line-height:1.45; margin-top:10px; }
 
+      /* hands-free voice */
+      .voice-status{ text-align:center; font-weight:800; font-size:1.08rem; color:var(--gold-bright); margin:12px 0 0; animation:vpulse 1.6s ease-in-out infinite; }
+      @keyframes vpulse{ 0%,100%{ opacity:1; } 50%{ opacity:.5; } }
+      .voice-banner{ background:var(--bad-bg); border:2px solid var(--bad); color:var(--ink); border-radius:12px; padding:12px 14px; font-weight:700; line-height:1.45; margin-top:12px; }
+      .hf-count{ text-align:center; font-family:"Cinzel",serif; font-weight:900; font-size:1.4rem; color:var(--leather-dark); margin:14px 0 4px; }
+      .toggle.disabled{ opacity:.35; cursor:default; }
+      .live-score{ margin-top:12px; }
+      .live-lab{ font-weight:800; color:var(--leather-dark); text-align:center; margin-bottom:6px; }
+      .live-bar{ height:12px; border-radius:999px; background:rgba(122,74,33,.18); border:1.5px solid var(--leather); overflow:hidden; }
+      .live-fill{ height:100%; width:0%; background:linear-gradient(90deg, var(--gold-deep), var(--gold-bright)); transition:width .15s linear; }
+      .live-chips{ display:flex; flex-wrap:wrap; gap:6px; justify-content:center; }
+      .live-chip{ font-weight:800; font-size:.9rem; padding:5px 10px; border-radius:999px; border:2px solid var(--leather); background:#fffdf4; color:var(--ink-soft); }
+      .live-chip.hit{ background:var(--good-bg); border-color:var(--good); color:#234d1e; }
+
       .small-note{ font-size:.88rem; color:var(--cream-dim); text-align:center; margin-top:10px; line-height:1.4; }
       .mt{ margin-top:14px; } .mt-lg{ margin-top:22px; }
       @media (prefers-reduced-motion: reduce){
-        .screen.active, .count-num.pop, .tap-cell.wrong{ animation:none; }
+        .screen.active, .count-num.pop, .tap-cell.wrong, .voice-status{ animation:none; }
         .timer-fill{ transition:none; }
       }
     </style>
@@ -346,6 +360,16 @@
             <button type="button" class="toggle" id="voiceToggle" role="switch" aria-checked="true" aria-label="Spoken call on or off"></button>
           </div>
 
+          <div class="toggle-row mt-lg">
+            <div>
+              <div style="font-weight:800; font-size:1.02rem;">Hands-Free Voice</div>
+              <div style="color:var(--cream-dim); font-size:.9rem;">For Real Bible Mode. Hands-free: say “Found it”, then read the verse out loud — no tapping during a round.</div>
+              <div id="hfAvail" style="color:var(--gold-bright); font-size:.9rem; font-weight:700; margin-top:4px;"></div>
+            </div>
+            <button type="button" class="toggle" id="hfToggle" role="switch" aria-checked="true" aria-label="Hands-free voice on or off"></button>
+          </div>
+          <p class="small-note" style="text-align:left;">Tap Start once so the app can use the microphone — after that, hands-free rounds need no taps. Every tap button stays as a backup.</p>
+
           <div class="best-strip">
             <div class="best-box"><div class="bb-num" id="bestVerified">—</div><div class="bb-lab">Best · Verified</div></div>
             <div class="best-box"><div class="bb-num" id="bestPractice">—</div><div class="bb-lab">Best · Practice</div></div>
@@ -366,6 +390,8 @@
             <li><strong>Photo Check:</strong> snap a photo of the open page and a leader (or another player) confirms it's the verse. The app itself does not read the photo — a person checks it.</li>
             <li><strong>Quiz Proof:</strong> one quick question. For KJV it's about the exact words; for other versions it's about what the verse says.</li>
             <li><strong>Using NLT or another version?</strong> Pick it in “Which Bible are you using?” above — you'll be checked on the verse's key words and content, not KJV wording.</li>
+            <li><strong>Hands-Free Voice (Real Bible Mode):</strong> turn it on above and a round runs itself. Tap Start once so the app can use the microphone, wait for the call, then say <strong>“Found it!”</strong> when you find the verse — points lock at that moment. Reading starts on its own after a 5-second countdown; read enough of the verse and the round proves itself, then the next round starts automatically. Every tap button stays as a backup.</li>
+            <li><strong>Hands-free works best solo or in a quiet room</strong> — other voices saying “found it” can trigger it. For loud group play, tap mode with a leader is better. Hands-free listening needs Chrome or Android Chrome; iPhone Safari can't listen, so the app falls back to taps there.</li>
             <li><strong>In-App Find Mode (Verified):</strong> tap the correct <strong>Book</strong>, then <strong>Chapter</strong>, then <strong>Verse</strong>. Wrong taps cost 5 points each, so accuracy counts.</li>
             <li><strong>Scoring:</strong> the faster you find it, the more of the 100 points you keep. Streaks earn bonuses. Run out of time and the round scores 0 — but the verse is always revealed so you still learn it.</li>
             <li><strong>Hints:</strong> Easy and Medium can show the testament and book family; Hard shows the testament only; Expert gets nothing. Using a hint costs 15 points.</li>
@@ -426,7 +452,9 @@
         <!-- Real Bible mode -->
         <div id="realZone" class="mt-lg">
           <button type="button" class="btn found-btn" id="foundBtn">FOUND IT!</button>
-          <p class="small-note">Tap the moment your eyes land on the verse in your Bible.<br />Then prove it: read it aloud, photo check, or a quick quiz.</p>
+          <p class="voice-status" id="voiceStatus" style="display:none;">🎙️ Listening — say “Found it!”</p>
+          <div class="voice-banner" id="voiceBanner" style="display:none;"></div>
+          <p class="small-note">Tap FOUND IT the moment your eyes land on the verse — or, with Hands-Free Voice on, just say “Found it!”<br />Then prove it: read it aloud, photo check, or a quick quiz.</p>
         </div>
 
         <!-- In-App mode -->
@@ -481,6 +509,10 @@
         </div>
         <div class="btn-row mt-lg">
           <button type="button" class="btn btn-gold" id="nextBtn">Next Round</button>
+        </div>
+        <div id="autoNext" style="display:none; text-align:center; margin-top:14px;">
+          <span id="autoNextText" style="font-weight:800; font-size:1rem;"></span>
+          <button type="button" class="icon-btn" id="autoPauseBtn" style="margin-left:8px;">Pause</button>
         </div>
       </section>
 
@@ -757,29 +789,79 @@
       diff: saved.diff || "easy",
       rounds: saved.rounds || 5,
       version: saved.version || "NLT",
-      voice: saved.voice !== false
+      voice: saved.voice !== false,
+      handsFree: saved.handsFree !== undefined ? saved.handsFree : true
     };
     var best = saved.best || { verified:0, practice:0 };
 
     function persist(){
       var s = store.get();
-      s.mode = settings.mode; s.diff = settings.diff; s.rounds = settings.rounds; s.version = settings.version; s.voice = settings.voice; s.best = best;
+      s.mode = settings.mode; s.diff = settings.diff; s.rounds = settings.rounds; s.version = settings.version; s.voice = settings.voice; s.handsFree = settings.handsFree; s.best = best;
       store.set(s);
     }
 
     /* ================= SPEECH ================= */
     var currentCall = "";
-    function speakCall(){
-      if(!settings.voice) return;
+    function speakText(text, onDone){
+      var done = false;
+      function fin(){ if(done) return; done = true; if(onDone) onDone(); }
+      if(!settings.voice || !("speechSynthesis" in window)){ if(onDone) setTimeout(fin, 350); return; }
       try{
-        if(!("speechSynthesis" in window)) return;
         window.speechSynthesis.cancel();
-        var u = new SpeechSynthesisUtterance(currentCall);
+        var u = new SpeechSynthesisUtterance(text);
         u.rate = 0.95; u.pitch = 1;
+        u.onend = fin; u.onerror = fin;
         window.speechSynthesis.speak(u);
+        // fallback: some browsers never fire onend — estimate the spoken length
+        var words = text.split(/\s+/).length;
+        setTimeout(fin, 900 + words * 480);
+      }catch(e){ fin(); }
+    }
+    function speakCall(onDone){ speakText(currentCall, onDone); }
+    function stopSpeech(){ try{ if("speechSynthesis" in window) window.speechSynthesis.cancel(); }catch(e){} }
+
+    /* ================= HANDS-FREE VOICE: HELPERS ================= */
+    var audioCtx = null;
+    function ensureAudio(){
+      try{
+        if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if(audioCtx.state === "suspended") audioCtx.resume();
       }catch(e){}
     }
-    function stopSpeech(){ try{ if("speechSynthesis" in window) window.speechSynthesis.cancel(); }catch(e){} }
+    function tone(freq, delay, dur){
+      if(!audioCtx) return;
+      try{
+        var t0 = audioCtx.currentTime + (delay || 0);
+        var o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.type = "sine"; o.frequency.value = freq;
+        g.gain.setValueAtTime(0.0001, t0);
+        g.gain.exponentialRampToValueAtTime(0.2, t0 + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(t0); o.stop(t0 + dur + 0.05);
+      }catch(e){}
+    }
+    function beepListen(){ tone(660, 0, 0.12); }
+    function chimeFound(){ tone(784, 0, 0.12); tone(1175, 0.1, 0.2); }
+    function chimeProven(){ tone(659, 0, 0.12); tone(880, 0.1, 0.12); tone(1318, 0.2, 0.28); }
+
+    function srCtor(){ return window.SpeechRecognition || window.webkitSpeechRecognition || null; }
+    var voiceBroken = false;
+    function hfActive(){
+      return settings.mode === "real" && settings.handsFree && !voiceBroken && !!srCtor();
+    }
+    function voiceUnavailable(){
+      if(voiceBroken) return;
+      voiceBroken = true;
+      settings.handsFree = false;
+      persist(); refreshSetup();
+      stopCmdListening();
+      var b = $("voiceBanner");
+      if(b){
+        b.textContent = "Hands-free voice isn't available right now — the microphone is blocked or this browser can't listen — so this game continues with taps: tap FOUND IT, then pick a proof. No penalty.";
+        b.style.display = "";
+      }
+    }
 
     /* ================= GAME STATE ================= */
     var G = null;
@@ -806,7 +888,8 @@
         hintUsed: false, wrongTaps: 0, totalTaps: 0,
         stage: "book", pickedBook: null, pickedChapter: null,
         lockedPoints: 0, findPoints: 0, proofTimerId: null, proofLeft: 0, proofDone: false,
-        proofMethod: null, proofDetail: "", photoUrl: null, readListening: false, transcript: ""
+        proofMethod: null, proofDetail: "", photoUrl: null, readListening: false, transcript: "",
+        inSearch: false, lastHeardText: "", hfRead: false, proofChooser: false, hfCountId: null
       };
     }
     function roundLimit(v){
@@ -818,6 +901,7 @@
       if(!G) return;
       if(G.timerId){ clearInterval(G.timerId); G.timerId = null; }
       if(G.proofTimerId){ clearInterval(G.proofTimerId); G.proofTimerId = null; }
+      stopCmdListening();
       stopRecognition();
     }
 
@@ -840,6 +924,11 @@
       $("voiceToggle").setAttribute("aria-checked", settings.voice ? "true" : "false");
       $("bestVerified").textContent = best.verified > 0 ? best.verified : "—";
       $("bestPractice").textContent = best.practice > 0 ? best.practice : "—";
+      var srOK = !!srCtor();
+      var hfT = $("hfToggle");
+      hfT.setAttribute("aria-checked", settings.handsFree && srOK ? "true" : "false");
+      hfT.classList.toggle("disabled", !srOK);
+      $("hfAvail").textContent = srOK ? "" : "Hands-free voice isn't available in this browser (it needs Chrome or Android Chrome to listen). Tap mode works as normal.";
     }
     document.querySelectorAll("#modeGrid .mode-card").forEach(function(c){
       c.addEventListener("click", function(){ settings.mode = c.getAttribute("data-mode"); persist(); refreshSetup(); });
@@ -858,15 +947,23 @@
       if(settings.voice){ currentCall = "Sword in hand! Find John chapter 4, verse 5."; speakCall(); }
       else stopSpeech();
     });
+    $("hfToggle").addEventListener("click", function(){
+      if(!srCtor()) return;
+      settings.handsFree = !settings.handsFree;
+      if(settings.handsFree) voiceBroken = false;
+      persist(); refreshSetup();
+    });
     $("startBtn").addEventListener("click", function(){ startGame(false); });
     $("practiceBtn").addEventListener("click", function(){ startGame(true); });
 
     /* ================= FLOW ================= */
     var readyTimers = [];
+    var searchToken = 0;
     function clearReadyTimers(){ readyTimers.forEach(function(t){ clearTimeout(t); }); readyTimers = []; }
 
     function startGame(practice){
-      stopSpeech(); stopTimers(); clearReadyTimers();
+      ensureAudio();
+      stopSpeech(); stopTimers(); clearReadyTimers(); stopAutoNext(); searchToken++;
       G = newGame(practice);
       startRound();
     }
@@ -881,6 +978,8 @@
       G.stage = "book"; G.pickedBook = null; G.pickedChapter = null;
       G.lockedPoints = 0; G.findPoints = 0; G.proofDone = false;
       G.proofMethod = null; G.proofDetail = ""; G.transcript = ""; G.readListening = false;
+      G.inSearch = false; G.lastHeardText = ""; G.hfRead = false; G.proofChooser = false;
+      if(G.hfCountId){ clearInterval(G.hfCountId); G.hfCountId = null; }
       if(G.photoUrl){ try{ URL.revokeObjectURL(G.photoUrl); }catch(e){} G.photoUrl = null; }
 
       var total = G.practice ? 1 : settings.rounds;
@@ -931,7 +1030,11 @@
       if(settings.mode === "app") buildStage();
       updateTimerUI();
       show("scr-search");
-      speakCall();
+      G.inSearch = true;
+      var myToken = ++searchToken;
+      // Hands-free: start listening only AFTER the spoken call finishes, so the
+      // mic never hears the app's own voice. speakCall's callback covers that.
+      speakCall(function(){ if(myToken === searchToken) armVoiceSearch(); });
 
       G.timerId = setInterval(function(){
         if(G.paused || G.over) return;
@@ -951,7 +1054,16 @@
       fill.classList.toggle("low", G.remaining <= 10);
     }
 
-    $("hearBtn").addEventListener("click", function(){ speakCall(); });
+    $("hearBtn").addEventListener("click", function(){
+      if(G && G.inSearch && hfActive()){
+        // don't let the mic hear the repeated call — pause listening, re-arm after
+        stopCmdListening();
+        var tk = searchToken;
+        speakCall(function(){ if(tk === searchToken) armVoiceSearch(); });
+      } else {
+        speakCall();
+      }
+    });
 
     $("hintBtn").addEventListener("click", function(){
       if(G.hintUsed) return;
@@ -969,15 +1081,16 @@
     /* ---- pause / quit ---- */
     $("pauseBtn").addEventListener("click", function(){
       if(!G || G.over) return;
-      G.paused = true; stopSpeech();
+      G.paused = true; stopSpeech(); stopCmdListening();
       $("pauseOverlay").classList.add("show");
     });
     $("resumeBtn").addEventListener("click", function(){
       G.paused = false;
       $("pauseOverlay").classList.remove("show");
+      armVoiceSearch();
     });
     function quitToSetup(){
-      stopTimers(); stopSpeech(); clearReadyTimers();
+      stopTimers(); stopSpeech(); clearReadyTimers(); stopAutoNext(); searchToken++;
       if(G && G.photoUrl){ try{ URL.revokeObjectURL(G.photoUrl); }catch(e){} G.photoUrl = null; }
       if(G) G.paused = false;
       $("pauseOverlay").classList.remove("show");
@@ -1068,29 +1181,125 @@
 
       $("nextBtn").textContent = G.practice ? "Back to Setup" : (G.idx + 1 >= total ? "See Results" : "Next Round");
       show("scr-reveal");
+      startAutoNext();
     }
 
-    $("nextBtn").addEventListener("click", function(){
+    /* ---- hands-free auto-advance on the Reveal screen ---- */
+    var autoNext = { id:null, left:0, paused:false };
+    function stopAutoNext(){
+      if(autoNext.id){ clearInterval(autoNext.id); autoNext.id = null; }
+      var el = $("autoNext"); if(el) el.style.display = "none";
+    }
+    function renderAutoNext(){
+      var t = $("autoNextText");
+      if(!t || !G) return;
+      var what = G.practice ? "Back to setup" : (G.idx + 1 >= G.deck.length ? "Results" : "Next round");
+      t.textContent = autoNext.paused
+        ? "Auto-advance paused — tap the button above when ready"
+        : (what + " in " + autoNext.left + "…");
+      $("autoPauseBtn").textContent = autoNext.paused ? "Resume" : "Pause";
+    }
+    function startAutoNext(){
+      stopAutoNext();
+      if(!hfActive() || !G) return;
+      var el = $("autoNext"); if(!el) return;
+      el.style.display = "";
+      autoNext.left = 6; autoNext.paused = false;
+      renderAutoNext();
+      autoNext.id = setInterval(function(){
+        if(autoNext.paused) return;
+        autoNext.left -= 1;
+        if(autoNext.left <= 0){ stopAutoNext(); advanceFromReveal(); return; }
+        renderAutoNext();
+      }, 1000);
+    }
+    function advanceFromReveal(){
+      stopAutoNext();
       if(!G) return;
       if(G.practice){ quitToSetup(); return; }
       if(G.idx + 1 >= G.deck.length){ showResults(); }
       else { G.idx += 1; startRound(); }
+    }
+    $("nextBtn").addEventListener("click", advanceFromReveal);
+    $("autoPauseBtn").addEventListener("click", function(){
+      autoNext.paused = !autoNext.paused;
+      renderAutoNext();
     });
 
     function onTimeout(){
       if(G.over) return;
       if(settings.mode === "real" && G.proofDone) return;
+      G.inSearch = false;
+      stopCmdListening();
       finishRound(false, "timeout", [{label:"Timed out", pts:0}]);
     }
 
+    /* ================= HANDS-FREE: "FOUND IT" VOICE COMMAND ================= */
+    var cmdRec = null, cmdActive = false, cmdErrs = 0;
+    function foundItHeard(text){
+      var t = " " + (text || "").toLowerCase().replace(/[^a-z\s]/g, " ").replace(/\s+/g, " ") + " ";
+      return t.indexOf(" found it ") >= 0 || t.indexOf(" foundit ") >= 0;
+    }
+    function armVoiceSearch(){
+      if(!G || !G.inSearch || G.over || G.paused || !hfActive()) return;
+      var vs = $("voiceStatus");
+      if(vs) vs.style.display = "";
+      beepListen();
+      startCmdListening();
+    }
+    function startCmdListening(){
+      if(cmdRec || !hfActive()) return;
+      var SR = srCtor(); if(!SR) return;
+      try{ cmdRec = new SR(); }catch(e){ cmdRec = null; return; }
+      cmdRec.lang = "en-US";
+      cmdRec.interimResults = true;
+      cmdRec.continuous = true;
+      cmdActive = true; cmdErrs = 0;
+      cmdRec.onresult = function(ev){
+        if(!G || G.over || G.paused || !G.inSearch) return;
+        var txt = "";
+        for(var i = 0; i < ev.results.length; i++) txt += ev.results[i][0].transcript + " ";
+        if(foundItHeard(txt)){
+          chimeFound();
+          triggerFound();
+        }
+      };
+      cmdRec.onerror = function(ev){
+        if(ev.error === "not-allowed" || ev.error === "service-not-allowed" || ev.error === "audio-capture"){
+          voiceUnavailable();
+        } else if(ev.error === "network"){
+          cmdErrs += 1;
+        }
+      };
+      cmdRec.onend = function(){
+        // browsers stop recognition after silence — restart it while still searching
+        if(cmdActive && cmdErrs <= 5 && G && G.inSearch && !G.over && !G.paused){
+          try{ cmdRec.start(); }catch(e){}
+        }
+      };
+      try{ cmdRec.start(); }catch(e){}
+    }
+    function stopCmdListening(){
+      cmdActive = false;
+      if(cmdRec){
+        try{ cmdRec.onresult = null; cmdRec.onend = null; cmdRec.onerror = null; cmdRec.stop(); }catch(e){}
+        cmdRec = null;
+      }
+      var vs = $("voiceStatus");
+      if(vs) vs.style.display = "none";
+    }
+
     /* ================= REAL BIBLE MODE: FOUND IT -> PROOF ================= */
-    $("foundBtn").addEventListener("click", function(){
-      if(!G || G.over || G.paused) return;
+    function triggerFound(){
+      if(!G || G.over || G.paused || !G.inSearch) return;
+      G.inSearch = false;
+      stopCmdListening();
       if(G.timerId){ clearInterval(G.timerId); G.timerId = null; }
       G.findPoints = speedPoints();
       G.lockedPoints = G.findPoints; // locked pending proof (streak bonus added if passed)
       startProof();
-    });
+    }
+    $("foundBtn").addEventListener("click", triggerFound);
 
     function distractorVerses(v, n){
       var sameBook = VERSES.filter(function(x){ return x !== v && x.b === v.b; });
@@ -1217,6 +1426,15 @@
       $("proofRef").textContent = refOf(v);
       $("proofLockedPill").textContent = "Locked: " + G.lockedPoints + " pts";
       stopProofClock();
+      if(hfActive() && !G.proofChooser){
+        // Hands-free: no chooser tap — go straight to Read Aloud, which
+        // starts listening on its own after the 5-second countdown.
+        G.hfRead = true;
+        G.proofMethod = "read";
+        show("scr-proof");
+        startRead();
+        return;
+      }
       var body = $("proofBody");
       body.innerHTML = "";
       var intro = document.createElement("p"); intro.className = "proof-q";
@@ -1246,7 +1464,7 @@
       var wrap = document.createElement("div"); wrap.style.textAlign = "center";
       var b = document.createElement("button");
       b.type = "button"; b.className = "switch-link"; b.textContent = "← Choose a different proof";
-      b.addEventListener("click", function(){ if(G && !G.proofDone && !G.over){ stopProofActivity(); startProof(); } });
+      b.addEventListener("click", function(){ if(G && !G.proofDone && !G.over){ G.hfRead = false; G.proofChooser = true; stopProofActivity(); startProof(); } });
       wrap.appendChild(b); body.appendChild(wrap);
     }
     function stopProofClock(){
@@ -1265,7 +1483,10 @@
         if(G.proofLeft <= 0){ stopProofClock(); onExpire(); }
       }, 1000);
     }
-    function stopProofActivity(){ stopProofClock(); stopRecognition(); }
+    function stopProofActivity(){
+      stopProofClock(); stopRecognition();
+      if(G && G.hfCountId){ clearInterval(G.hfCountId); G.hfCountId = null; }
+    }
     function chooseProof(method){
       if(!G || G.over) return;
       G.proofMethod = method;
@@ -1339,6 +1560,7 @@
       var heard = document.createElement("div"); heard.className = "heard-box"; heard.id = "heardBox";
       heard.innerHTML = '<span class="dim2">What the app hears will appear here…</span>';
       body.appendChild(heard);
+      body.appendChild(buildLiveScore());
       var micBtn = document.createElement("button");
       micBtn.type = "button"; micBtn.className = "btn btn-gold mt"; micBtn.id = "micBtn";
       micBtn.textContent = "🎤 Tap and read the verse out loud";
@@ -1349,13 +1571,43 @@
       doneBtn.style.display = "none";
       body.appendChild(doneBtn);
       addSwitchLink(body);
-      micBtn.addEventListener("click", function(){ beginListening(status, heard, micBtn, doneBtn); });
+      micBtn.addEventListener("click", function(){
+        if(G && G.hfCountId){ clearInterval(G.hfCountId); G.hfCountId = null; }
+        beginListening(status, heard, micBtn, doneBtn);
+      });
       doneBtn.addEventListener("click", function(){ finishReading(); });
+      if(G.hfRead){
+        // Hands-free: announce, count down 5 seconds, then start listening
+        // automatically — no mic tap needed. The mic button stays as backup.
+        var cd = document.createElement("div");
+        cd.id = "hfReadCount"; cd.className = "hf-count";
+        cd.textContent = "Reading starts in 5…";
+        body.insertBefore(cd, micBtn);
+        micBtn.textContent = "🎤 Start reading now";
+        speakText("Read the verse.");
+        var left = 5;
+        G.hfCountId = setInterval(function(){
+          left -= 1;
+          if(left <= 0){
+            clearInterval(G.hfCountId); G.hfCountId = null;
+            cd.textContent = "🎙️ Listening — read the verse out loud";
+            beginListening(status, heard, micBtn, doneBtn);
+          } else {
+            cd.textContent = "Reading starts in " + left + "…";
+          }
+        }, 1000);
+      }
     }
     function beginListening(status, heard, micBtn, doneBtn){
       if(!G || G.proofDone) return;
       var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
       G.transcript = "";
+      G.lastHeardText = "";
+      if(G.hfCountId){ clearInterval(G.hfCountId); G.hfCountId = null; }
+      var cdEl = $("hfReadCount");
+      if(cdEl) cdEl.textContent = "🎙️ Listening — read the verse out loud";
+      if(G.hfRead) beepListen();
+      updateLiveScore("");
       try{ recognition = new SR(); }
       catch(e){ readFallback("This browser can't listen right now. Use Photo Check or Quiz Proof instead — no penalty for switching."); return; }
       recognition.lang = "en-US";
@@ -1371,11 +1623,17 @@
         }
         G.transcript = finalT;
         var txt = (finalT + interim).trim();
+        G.lastHeardText = txt;
         heard.textContent = txt || "Listening…";
+        updateLiveScore(txt);
+        // Hands-free: the instant enough of the verse is heard, it counts —
+        // no Done tap needed.
+        if(G.hfRead && !G.proofDone && txt && scoreCurrentReading(txt).ok){ finishReading(); }
       };
       recognition.onerror = function(ev){
         if(ev.error === "not-allowed" || ev.error === "service-not-allowed" || ev.error === "audio-capture"){
           G.readListening = false;
+          voiceUnavailable();
           readFallback("The microphone is blocked or unavailable, so the app can't hear you. Use Photo Check or Quiz Proof instead — no penalty for switching.");
         }
       };
@@ -1405,39 +1663,91 @@
       row.appendChild(b1); row.appendChild(b2);
       body.appendChild(row);
     }
+    /* ---- shared read-aloud scoring (used live and at the finish) ---- */
+    function scoreKJV(text){
+      var vw = normTokens(G.verse.t);
+      var m = lcsLen(vw, normTokens(text));
+      var need = Math.ceil(vw.length * 0.75);
+      return { matched:m, total:vw.length, need:need, ok: vw.length > 0 && m >= need };
+    }
+    function scoreKeys(text){
+      var groups = keyDataFor(G.verse).k;
+      var heardN = normString(text);
+      var got = [], missed = [];
+      groups.forEach(function(g){
+        var hit = g[1].some(function(syn){ return (" " + heardN + " ").indexOf(" " + syn + " ") >= 0; });
+        (hit ? got : missed).push(g[0]);
+      });
+      var needG = Math.ceil(groups.length * 0.7);
+      if(groups.length <= 4 && needG === groups.length && groups.length > 1) needG = groups.length - 1;
+      return { got:got, missed:missed, needG:needG, ok: got.length > 0 && got.length >= needG };
+    }
+    function scoreCurrentReading(text){ return isKJV() ? scoreKJV(text) : scoreKeys(text); }
+    function buildLiveScore(){
+      var wrap = document.createElement("div");
+      wrap.id = "liveScore"; wrap.className = "live-score";
+      if(isKJV()){
+        var total = normTokens(G.verse.t).length;
+        wrap.innerHTML = '<div class="live-lab" id="liveLab">Words heard: 0 of ' + total + '</div><div class="live-bar"><div class="live-fill" id="liveFill"></div></div>';
+      } else {
+        var groups = keyDataFor(G.verse).k;
+        var lab = document.createElement("div"); lab.className = "live-lab"; lab.id = "liveLab";
+        lab.textContent = "Key words: 0 of " + groups.length;
+        wrap.appendChild(lab);
+        var chips = document.createElement("div"); chips.className = "live-chips";
+        groups.forEach(function(g){
+          var s = document.createElement("span"); s.className = "live-chip"; s.textContent = g[0];
+          chips.appendChild(s);
+        });
+        wrap.appendChild(chips);
+      }
+      return wrap;
+    }
+    function updateLiveScore(text){
+      if(!$("liveScore") || !G || !G.verse) return;
+      if(isKJV()){
+        var sc = scoreKJV(text || "");
+        var lab = $("liveLab"); if(lab) lab.textContent = "Words heard: " + sc.matched + " of " + sc.total + " (need " + sc.need + ")";
+        var fill = $("liveFill"); if(fill) fill.style.width = (sc.total ? Math.min(100, Math.round(sc.matched / sc.total * 100)) : 0) + "%";
+      } else {
+        var sc2 = scoreKeys(text || "");
+        var groups = keyDataFor(G.verse).k;
+        var chips = document.querySelectorAll("#liveScore .live-chip");
+        chips.forEach(function(ch, i){
+          if(!groups[i]) return;
+          var hit = sc2.got.indexOf(groups[i][0]) >= 0;
+          ch.classList.toggle("hit", hit);
+          ch.textContent = groups[i][0] + (hit ? " ✓" : "");
+        });
+        var lab2 = $("liveLab"); if(lab2) lab2.textContent = "Key words: " + sc2.got.length + " of " + groups.length + " (need " + sc2.needG + ")";
+      }
+    }
+
     function finishReading(){
       if(!G || G.proofDone || G.over) return;
       G.proofDone = true;
       stopProofClock();
-      var heardText = (G.transcript || "").trim();
+      var heardText = (G.lastHeardText || G.transcript || "").trim();
       stopRecognition();
       var v = G.verse;
       var status = $("readStatus");
       if(isKJV()){
-        var verseWords = normTokens(v.t);
-        var heardWords = normTokens(heardText);
-        var matched = lcsLen(verseWords, heardWords);
-        var need = Math.ceil(verseWords.length * 0.75);
-        var ok = verseWords.length > 0 && matched >= need;
-        G.proofDetail = "Heard " + matched + " of " + verseWords.length + " words of the KJV text.";
+        var scK = scoreKJV(heardText);
+        var matched = scK.matched;
+        var ok = scK.ok;
+        G.proofDetail = "Heard " + matched + " of " + scK.total + " words of the KJV text.";
         if(status){
-          status.textContent = ok ? ("✓ " + G.proofDetail + " — Proven!") : ("Heard " + matched + " of " + verseWords.length + " words — not enough to prove it.");
+          status.textContent = ok ? ("✓ " + G.proofDetail + " — Proven!") : ("Heard " + matched + " of " + scK.total + " words — not enough to prove it.");
           status.classList.remove("live");
         }
+        if(ok && G.hfRead) chimeProven();
         var lines = ok ? [{label:"Find points (locked at FOUND IT)", pts:G.findPoints}]
                        : [{label:"Read-aloud check missed — locked points lost", pts:0}];
         setTimeout(function(){ if(G) finishRound(ok, ok ? "found" : "proof-fail", lines); }, 1100);
       } else {
-        var groups = keyDataFor(v).k;
-        var heardN = normString(heardText);
-        var got = [], missed = [];
-        groups.forEach(function(g){
-          var hit = g[1].some(function(syn){ return (" " + heardN + " ").indexOf(" " + syn + " ") >= 0; });
-          (hit ? got : missed).push(g[0]);
-        });
-        var needG = Math.ceil(groups.length * 0.7);
-        if(groups.length <= 4 && needG === groups.length && groups.length > 1) needG = groups.length - 1;
-        var ok2 = got.length > 0 && got.length >= needG;
+        var scG = scoreKeys(heardText);
+        var got = scG.got, missed = scG.missed;
+        var ok2 = scG.ok;
         G.proofDetail = "Key words heard: " + (got.length ? got.join(", ") : "none") + " (" + settings.version + ").";
         if(status){
           status.textContent = ok2
@@ -1445,6 +1755,7 @@
             : ("Heard the key words: " + (got.length ? got.join(", ") : "none") + (missed.length ? " — missed: " + missed.join(", ") : "") + ". Not proven.");
           status.classList.remove("live");
         }
+        if(ok2 && G.hfRead) chimeProven();
         var lines2 = ok2 ? [{label:"Find points (locked at FOUND IT)", pts:G.findPoints}]
                          : [{label:"Read-aloud check missed — locked points lost", pts:0}];
         setTimeout(function(){ if(G) finishRound(ok2, ok2 ? "found" : "proof-fail", lines2); }, 1100);
